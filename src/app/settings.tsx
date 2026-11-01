@@ -77,8 +77,8 @@ export default function SettingsScreen() {
             <Text style={styles.panelTitle}>{isPremium ? 'You have Lulla Plus ✓' : 'Free plan'}</Text>
             <Text style={styles.body}>
               {isPremium
-                ? 'All sounds, words, steps, and personalization are unlocked.'
-                : 'Upgrade for all 20 sounds, all words, My voice recording, full First steps, and personalized plans.'}
+                ? 'Sleep predictions and charts, unlimited memories and keepsake PDFs, every sound and word, and personalization are unlocked.'
+                : 'Upgrade for sleep predictions and charts, unlimited memories with keepsake PDFs, all 20 sounds, all words, and personalized plans.'}
             </Text>
             <Row label={isPremium ? 'Manage Lulla Plus' : 'See Lulla Plus'} onPress={() => router.push('/paywall')} />
             {mode !== 'unavailable' ? <Row label="Restore purchases" onPress={doRestore} /> : null}
@@ -126,8 +126,8 @@ export default function SettingsScreen() {
               <View style={styles.confirm}>
                 <Text style={styles.confirmTitle}>Delete everything?</Text>
                 <Text style={styles.confirmBody}>
-                  This permanently erases your baby profile, milestones, medicine dose log, voice recordings, and app
-                  lock setting from this device. It can’t be undone. Your Lulla Plus purchase is not affected.
+                  This permanently erases your baby profile, milestones, sleep log, medicine courses and dose logs, memories
+                  (photos and voice clips), voice recordings, scheduled reminders, and app lock setting from this device. It can’t be undone. Your Lulla Plus purchase is not affected.
                 </Text>
                 <View style={styles.confirmRow}>
                   <Pressable onPress={() => setConfirming(false)} style={styles.cancelBtn} accessibilityRole="button">

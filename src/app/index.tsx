@@ -36,6 +36,12 @@ const actions = [
     hint: 'Tummy time to walking practice',
     primary: false,
   },
+  {
+    href: '/antibiotics' as const,
+    label: 'Antibiotic course tracker',
+    hint: 'Log every dose, get reminders, count down to the last one',
+    primary: false,
+  },
   ...(config.medicineDoses
     ? [
         {
@@ -100,7 +106,7 @@ export default function HomeScreen() {
               style={({ pressed }) => [styles.plus, pressed && styles.pressed]}
             >
               <Text style={styles.plusTitle}>Lulla Plus</Text>
-              <Text style={styles.plusHint}>All sounds, all words, My voice, full First steps, personalized plans</Text>
+              <Text style={styles.plusHint}>Sleep predictions, unlimited memories, keepsake PDFs, every sound and word</Text>
             </Pressable>
           ) : null}
           {actions.map((action) => (

@@ -12,6 +12,7 @@ export function HomeTiles() {
   const done = due.filter((m) => profile.achieved[m.id]).length;
 
   return (
+    <View style={styles.wrap}>
     <View style={styles.row}>
       <Pressable
         accessibilityRole="button"
@@ -38,10 +39,36 @@ export function HomeTiles() {
         </Text>
       </Pressable>
     </View>
+    <View style={styles.row}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push('/coach')}
+        style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+      >
+        <Text style={styles.emoji}>🌙</Text>
+        <Text style={styles.label}>Sleep coach</Text>
+        <Text style={styles.hint} numberOfLines={2}>
+          Log naps, see wake windows
+        </Text>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push('/memories')}
+        style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+      >
+        <Text style={styles.emoji}>📸</Text>
+        <Text style={styles.label}>Memory book</Text>
+        <Text style={styles.hint} numberOfLines={2}>
+          Photos, voice clips, moments
+        </Text>
+      </Pressable>
+    </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrap: { gap: spacing.md },
   row: { flexDirection: 'row', gap: spacing.md },
   tile: {
     flex: 1,

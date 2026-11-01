@@ -18,7 +18,7 @@ These terms apply when you use Lulla. They work together with Apple’s Standard
 - Lulla is free to use with core features. Lulla Plus unlocks extra features and is available as an auto-renewing subscription (monthly or yearly) or a one-time lifetime purchase. Prices are shown in the app before you buy and may vary by country.
 - Payment is charged to your Apple ID. Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period. You can manage or cancel in your Apple ID account settings. Free trials, when offered, convert to a paid subscription unless canceled before the trial ends.
 - Refunds are handled by Apple under its policies. If prices change, Apple will notify you and ask for your consent where required.
-- Safety and health tracking features, including milestones, food and choking safety, medicine safety information, and privacy controls, stay free.
+- Safety and health tracking features, including milestones, food and choking safety, the antibiotic course tracker, medicine safety information, and privacy controls, stay free. Free accounts can save up to 10 memories, and Plus unlocks more.
 
 ## Sleep sounds
 

@@ -154,6 +154,20 @@ export default function MilestonesScreen() {
                             {when ? ` · Noted ${noted(when)}` : ''}
                           </Text>
                           {!when && (isCurrent || isNext) ? <Text style={styles.rowTip}>Try: {item.tip}</Text> : null}
+                          {when ? (
+                            <Pressable
+                              accessibilityRole="button"
+                              hitSlop={8}
+                              onPress={() =>
+                                router.push({
+                                  pathname: '/memory-new',
+                                  params: { kind: 'milestone', refId: item.id, title: item.text },
+                                })
+                              }
+                            >
+                              <Text style={styles.memoryLink}>📸 Save as a memory</Text>
+                            </Pressable>
+                          ) : null}
                         </View>
                       </Pressable>
                     );
@@ -175,6 +189,7 @@ const styles = StyleSheet.create({
   scroll: { paddingHorizontal: spacing.lg, alignItems: 'center' },
   column: { width: '100%', maxWidth: 480 },
   flex: { flex: 1 },
+  memoryLink: { marginTop: 4, fontFamily: 'Nunito_700Bold', fontSize: 13, color: colors.butter },
   backText: { fontFamily: 'Nunito_600SemiBold', color: colors.mist, fontSize: 15, marginBottom: spacing.sm },
   title: { fontFamily: 'Fraunces_700Bold', fontSize: 34, color: colors.foam },
   subtitle: {

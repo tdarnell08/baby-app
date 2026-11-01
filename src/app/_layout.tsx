@@ -18,6 +18,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '@/constants/theme';
 import { LockProvider } from '@/providers/LockProvider';
 import { PremiumProvider } from '@/providers/PremiumProvider';
+import { RemindersRunner } from '@/providers/RemindersRunner';
 
 export default function RootLayout() {
   const [frauncesLoaded, frauncesError] = useFraunces({
@@ -61,6 +62,7 @@ export default function RootLayout() {
   return (
     <PremiumProvider>
       <LockProvider>
+        <RemindersRunner />
         <StatusBar style="light" />
         <Stack
           screenOptions={{

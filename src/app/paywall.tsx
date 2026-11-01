@@ -5,7 +5,7 @@ import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, Text, Vi
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { APPLE_MANAGE_SUBSCRIPTIONS } from '@/config';
 import { colors, radii, spacing } from '@/constants/theme';
-import { featureTable, freePromise, paywallDisclosure, type PlanId } from '@/data/pricing';
+import { featureTable, freePromise, paywallDisclosure, plusBenefits, type PlanId } from '@/data/pricing';
 import type { Offer } from '@/lib/purchases';
 import { usePremium } from '@/providers/PremiumProvider';
 
@@ -69,7 +69,7 @@ export default function PaywallScreen() {
 
           <Text style={styles.title}>Lulla Plus</Text>
           <Text style={styles.subtitle}>
-            More sounds, more words, and a plan built around your baby. Safety stays free.
+            Sleep you can plan around, memories you can keep, and keepsakes the whole family will treasure. Safety stays free.
           </Text>
 
           {mode === 'mock' ? (
@@ -98,6 +98,18 @@ export default function PaywallScreen() {
               ) : null}
             </View>
           ) : null}
+
+          <View style={styles.benefits}>
+            {plusBenefits.map((b) => (
+              <View key={b.title} style={styles.benefit}>
+                <Text style={styles.benefitEmoji}>{b.emoji}</Text>
+                <View style={styles.benefitText}>
+                  <Text style={styles.benefitTitle}>{b.title}</Text>
+                  <Text style={styles.benefitBody}>{b.body}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
 
           <View style={styles.table}>
             <View style={styles.tr}>
@@ -261,6 +273,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(255,255,255,0.15)',
   },
+  benefits: { gap: spacing.sm },
+  benefit: {
+    flexDirection: 'row',
+    gap: spacing.md,
+    backgroundColor: 'rgba(230,201,106,0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(230,201,106,0.4)',
+    borderRadius: radii.md,
+    padding: spacing.md,
+  },
+  benefitEmoji: { fontSize: 28 },
+  benefitText: { flex: 1, gap: 2 },
+  benefitTitle: { fontFamily: 'Fraunces_600SemiBold', fontSize: 18, color: colors.foam },
+  benefitBody: { fontFamily: 'Nunito_400Regular', fontSize: 13, lineHeight: 19, color: colors.mist },
   colLabel: { flex: 1.1 },
   colTier: { flex: 1.3 },
   th: { fontFamily: 'Nunito_700Bold', fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.8, color: colors.mist },

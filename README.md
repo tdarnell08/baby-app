@@ -22,6 +22,24 @@ An Expo (React Native) app for baby sleep, first words, first foods, and early m
 - A compact "milestones to watch" strip on First words (language), First foods (feeding), and First steps (movement)
 - The daily plan's "milestone to watch for" skips ones you have already checked
 
+**Sleep coach** (`/coach`)
+- One-tap "Start nap", "Start night sleep", and "Baby woke up", with "started 5, 15, or 30 minutes ago" for when you forgot to tap
+- Today's totals and a 24-hour timeline; typical awake time, naps, and total sleep for the baby's age (AASM and National Sleep Foundation ranges)
+- Plus: next sleep window predicted from the median of recent awake gaps (falls back to the age range until there are 3 samples), bedtime from recent nights, a local notification 5 to 30 minutes before the window opens, a 7-day stacked chart (naps and night) and weekly averages
+
+**Memory book** (`/memories`, `/memory-new`, `/recap`)
+- Moments ("Today they..."), milestones (from the Milestone tracker), and first words (from First words), each with up to 3 photos and a 60-second voice clip
+- Timeline grouped by month; free users keep 10 memories
+- Plus: monthly recap (milestones, first words, photos, average sleep) and keepsake PDFs for a month or a year, laid out and generated on the device with `expo-print`
+- Photos are resized with `expo-image-manipulator` and kept only in the app's private folder
+
+**Antibiotic course tracker** (`/antibiotics`, `/course-new`, `/course`), free
+- A tracker, not a calculator: the parent types the medicine, dose, and schedule exactly as on the pharmacy label. Lulla never computes, suggests, or validates a dose
+- Schedule by clock times or "every N hours", start date and time, and course length; countdown (day X of N, doses left, finish time)
+- Local dose reminders (generic text, so the medicine name never appears on the lock screen) and a follow-up if a dose is not logged
+- Log each dose with who gave it, a possible double-dose warning when it is too soon compared with the entered schedule, missed-dose flags, "vomited after dose" with a call-your-pharmacist notice, side-effect notes
+- Share a text summary or save a PDF for the doctor
+
 **Medicine doses**
 - Weight-based acetaminophen and ibuprofen doses (mL and mg) from the AAP's published dosing tables, with every band checked in code against the 10 to 15 mg/kg and 5 to 10 mg/kg per-dose ranges
 - Age limits enforced: no ibuprofen under 6 months, and a "call your pediatrician first" message for acetaminophen under 12 weeks
@@ -62,10 +80,12 @@ Lulla is not affiliated with any TV show and does not imitate anyone's voice. Fi
 
 ## Free and Plus tiers
 
-Safety and health tracking are always free (milestones, first foods and choking safety, medicine safety, privacy and security controls). Lulla Plus unlocks extra content and personalization.
+Safety and health tracking are always free (milestones, first foods and choking safety, the antibiotic course tracker with reminders, medicine safety, privacy and security controls). Lulla Plus is sold around sleep, memories, and family keepsakes, plus extra content.
 
 | | Free | Lulla Plus |
 | --- | --- | --- |
+| Sleep coach | One-tap logging, today's view, typical wake windows | Predicted next sleep window, reminder before it opens, daily and weekly charts |
+| Memory book | 10 memories with photos and voice clips | Unlimited, monthly recap, month or year keepsake PDF |
 | Sleep sounds | 6 core sounds, 15/30/45 min timer | All 20 sounds, all-night timer |
 | First words | 12 starter words | All 24 words, "My voice" recording |
 | First steps | Tummy time, rolling, sitting | Crawling, standing, walking |
@@ -75,8 +95,8 @@ Pricing (set in App Store Connect; the app shows store prices): Yearly $29.99 wi
 
 ## Privacy and security
 
-- No accounts, ads, analytics, or tracking. Baby data stays on the device.
-- Profile and dose log are stored in the iOS Keychain / Android Keystore (`expo-secure-store`, device-only), with validation on every read.
+- No accounts, ads, analytics, or tracking. Baby data stays on the device. Reminders are local notifications, and PDFs are generated on the phone.
+- Profile, dose log, sleep log, medicine courses, and memory text are stored in the iOS Keychain / Android Keystore (`expo-secure-store`, device-only), with validation on every read.
 - Optional app lock with Face ID / passcode; the app is covered in the app switcher.
 - Settings has data export, delete-all, and the privacy policy, terms, and medical disclaimer.
 - The medicine dosing page is controlled by `EXPO_PUBLIC_ENABLE_MEDICINE_DOSES` and is off in the production EAS profile (App Store Guideline 1.4.1).
@@ -98,9 +118,9 @@ To share a browser preview from a remote machine: `npx expo export --platform we
 
 ## Project layout
 
-- `src/app/`: screens (Expo Router): home, plan, profile, milestones, medicine, sleep, words, foods, steps, paywall, settings, legal
+- `src/app/`: screens (Expo Router): home, plan, profile, milestones, medicine, sleep, coach, memories, memory-new, recap, antibiotics, course-new, course, words, foods, steps, paywall, settings, legal
 - `src/providers/`: purchases/entitlement and app lock
-- `src/lib/`: secure storage, profile store, purchase engine, data export/delete
+- `src/lib/`: secure storage, profile/sleep/course/memory stores, `sleepCoach.ts` (wake windows and prediction), `courseLogic.ts` (schedule, missed and double-dose checks), `reminders.ts` (local notifications), `keepsake.ts` and `pdf.ts`, `media.ts`, purchase engine, data export/delete
 - `src/data/pricing.ts` and `src/data/legal.ts`: tiers, pricing, and legal text
 - `src/data/medications.ts`: dosing tables, safety rules, and the dose calculation
 - `src/hooks/useMedLog.ts`: the on-device dose log

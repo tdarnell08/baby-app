@@ -9,6 +9,9 @@ const options: SecureStore.SecureStoreOptions = {
 
 const useNative = Platform.OS !== 'web';
 
+// Last pieces written per key in this session, so a save only touches chunks that changed.
+const written = new Map<string, string[]>();
+
 function metaKey(key: string) {
   return `${key}.n`;
 }
@@ -27,6 +30,7 @@ export async function secureGet(key: string): Promise<string | null> {
     if (part === null) return null;
     parts.push(part);
   }
+  written.set(key, parts);
   return parts.join('');
 }
 
@@ -35,6 +39,7 @@ export async function secureDelete(key: string): Promise<void> {
     await AsyncStorage.removeItem(key);
     return;
   }
+  written.delete(key);
   const count = Number(await SecureStore.getItemAsync(metaKey(key), options));
   const total = Number.isInteger(count) && count > 0 ? Math.min(count, 200) : 0;
   for (let i = 0; i < total; i++) await SecureStore.deleteItemAsync(chunkKey(key, i), options);
@@ -50,8 +55,13 @@ export async function secureSet(key: string, value: string): Promise<void> {
   const pieces: string[] = [];
   for (let i = 0; i < value.length; i += CHUNK) pieces.push(value.slice(i, i + CHUNK));
   if (pieces.length === 0) pieces.push('');
-  for (let i = 0; i < pieces.length; i++) await SecureStore.setItemAsync(chunkKey(key, i), pieces[i], options);
+  const known = written.get(key);
+  for (let i = 0; i < pieces.length; i++) {
+    if (known && known[i] === pieces[i]) continue;
+    await SecureStore.setItemAsync(chunkKey(key, i), pieces[i], options);
+  }
   await SecureStore.setItemAsync(metaKey(key), String(pieces.length), options);
+  written.set(key, pieces);
   if (Number.isInteger(previous) && previous > pieces.length) {
     for (let i = pieces.length; i < Math.min(previous, 200); i++) {
       await SecureStore.deleteItemAsync(chunkKey(key, i), options);

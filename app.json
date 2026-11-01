@@ -17,9 +17,6 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "buildNumber": "1",
-      "config": {
-        "usesNonExemptEncryption": false
-      },
       "privacyManifests": {
         "NSPrivacyTracking": false,
         "NSPrivacyTrackingDomains": [],
@@ -87,7 +84,22 @@
         }
       ],
       "expo-status-bar",
-      "expo-asset"
+      "expo-asset",
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "enableRemoteNotifications": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Lulla reads only the photos you choose to add to your memory book. Copies are resized and saved privately on this device and are never uploaded.",
+          "cameraPermission": "Lulla uses the camera only when you tap Take a photo for your memory book. Photos stay on this device.",
+          "microphonePermission": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

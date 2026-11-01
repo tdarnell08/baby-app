@@ -277,6 +277,20 @@ export default function WordsScreen() {
             </View>
           </Animated.View>
 
+          <Pressable
+            accessibilityRole="button"
+            hitSlop={8}
+            onPress={() =>
+              router.push({
+                pathname: '/memory-new',
+                params: { kind: 'word', refId: word.id, title: `Said “${word.word}”` },
+              })
+            }
+            style={styles.memoryLink}
+          >
+            <Text style={styles.memoryLinkText}>📸 Save the first time they say “{word.word}”</Text>
+          </Pressable>
+
           <View style={styles.nav}>
             <Pressable accessibilityRole="button" onPress={() => go(-1)} style={styles.navBtn}>
               <Text style={styles.navLabel}>Previous</Text>
@@ -558,6 +572,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  memoryLink: { alignSelf: 'center', marginTop: spacing.sm },
+  memoryLinkText: { fontFamily: 'Nunito_700Bold', fontSize: 14, color: colors.butter },
   navBtn: {
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,

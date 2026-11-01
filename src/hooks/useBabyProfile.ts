@@ -1,12 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { formatAge, buildPlan, dateKey } from '@/data/plan';
+import { buildPlan, dateKey } from '@/data/plan';
+import { computeAge, fromKey, monthsBetween } from '@/lib/age';
 import { defaultProfile, loadProfile, saveProfile } from '@/lib/profileStore';
 import { MAX_AGE_MONTHS, type BabyProfile } from '@/lib/profileTypes';
 import { usePremium } from '@/providers/PremiumProvider';
-
-const MONTH_MS = 30.44 * 24 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export { MAX_AGE_MONTHS };
 export type { BabyProfile };
@@ -19,16 +17,6 @@ export function parseBirthDate(year: number, month: number, day: number, now: Da
   return dateKey(date);
 }
 
-function fromKey(key: string) {
-  const [y, m, d] = key.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function monthsBetween(birth: Date, now: Date) {
-  let months = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
-  if (now.getDate() < birth.getDate()) months -= 1;
-  return Math.max(0, months);
-}
 
 export function useBabyProfile() {
   const [profile, setProfile] = useState<BabyProfile>(defaultProfile);
@@ -103,22 +91,10 @@ export function useBabyProfile() {
     [update],
   );
 
-  const { ageMonths, ageLabel } = useMemo(() => {
-    if (profile.birthDate) {
-      const birth = fromKey(profile.birthDate);
-      const months = Math.min(MAX_AGE_MONTHS, monthsBetween(birth, now));
-      const days = Math.max(0, Math.floor((now.getTime() - birth.getTime()) / DAY_MS));
-      if (months < 3) {
-        const weeks = Math.floor(days / 7);
-        const label = days < 14 ? `${days} day${days === 1 ? '' : 's'}` : `${weeks} weeks`;
-        return { ageMonths: months, ageLabel: label };
-      }
-      return { ageMonths: months, ageLabel: formatAge(months) };
-    }
-    const grown = Math.floor((now.getTime() - profile.ageSetAt) / MONTH_MS);
-    const months = Math.max(0, Math.min(MAX_AGE_MONTHS, profile.ageMonths + Math.max(0, grown)));
-    return { ageMonths: months, ageLabel: formatAge(months) };
-  }, [now, profile.birthDate, profile.ageMonths, profile.ageSetAt]);
+  const { ageMonths, ageLabel } = useMemo(
+    () => computeAge({ birthDate: profile.birthDate, ageMonths: profile.ageMonths, ageSetAt: profile.ageSetAt }, now),
+    [now, profile.birthDate, profile.ageMonths, profile.ageSetAt],
+  );
 
   const achievedIds = useMemo(() => Object.keys(profile.achieved), [profile.achieved]);
 
