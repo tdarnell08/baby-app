@@ -80,7 +80,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Lulla uses Face ID to keep your baby's profile and dose log private if you turn on App lock."
+          "faceIDPermission": "Lulla uses Face ID to keep your baby's profile and health logs private if you turn on App lock."
         }
       ],
       "expo-status-bar",

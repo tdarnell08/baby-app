@@ -13,8 +13,7 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_ENABLE_MOCK_PURCHASES": "false",
-        "EXPO_PUBLIC_ENABLE_MEDICINE_DOSES": "false"
+        "EXPO_PUBLIC_ENABLE_MOCK_PURCHASES": "false"
       }
     }
   },

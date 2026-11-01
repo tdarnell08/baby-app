@@ -13,8 +13,12 @@ export type DoseLog = {
 
 export type CourseNote = { id: string; at: number; text: string };
 
+export type MedMode = 'course' | 'asNeeded';
+
 export type Course = {
   id: string;
+  mode: MedMode;
+  maxPer24: number | null;
   medName: string;
   doseText: string;
   schedule: Schedule;
@@ -38,14 +42,16 @@ export function timesPerDay(schedule: Schedule) {
   return schedule.kind === 'times' ? schedule.times.length : Math.max(1, Math.ceil(24 / schedule.hours));
 }
 
-export function totalDoses(course: Pick<Course, 'schedule' | 'days'>) {
+export function totalDoses(course: Pick<Course, 'schedule' | 'days'> & { mode?: MedMode }) {
+  if (course.mode === 'asNeeded') return 0;
   const { schedule, days } = course;
   if (schedule.kind === 'times') return schedule.times.length * days;
   return Math.max(1, Math.ceil((days * 24) / schedule.hours));
 }
 
-export function slotTimes(course: Pick<Course, 'schedule' | 'days' | 'startAt'>): number[] {
+export function slotTimes(course: Pick<Course, 'schedule' | 'days' | 'startAt'> & { mode?: MedMode }): number[] {
   const total = totalDoses(course);
+  if (total === 0) return [];
   const { schedule, startAt } = course;
   if (schedule.kind === 'interval') {
     return Array.from({ length: total }, (_, i) => startAt + i * schedule.hours * HOUR);
@@ -100,6 +106,9 @@ export type CourseState = {
   hoursLeft: number;
   daysLeft: number;
   lastGivenAt: number | null;
+  nextAllowedAt: number | null;
+  allowedNow: boolean;
+  count24: number;
 };
 
 export function courseState(course: Course, now: number): CourseState {
@@ -117,11 +126,16 @@ export function courseState(course: Course, now: number): CourseState {
   }
   const endsAt = slots.length ? slots[slots.length - 1] : course.startAt + course.days * DAY;
   const stopped = course.stoppedAt !== null;
-  const finished = stopped || (done.size >= total && total > 0) || (nextSlot === null && now > endsAt + grace);
+  const asNeededMode = course.mode === 'asNeeded';
+  const finished = stopped || (!asNeededMode && ((done.size >= total && total > 0) || (nextSlot === null && now > endsAt + grace)));
   const nextAt = nextSlot === null ? null : slots[nextSlot];
   const lastGivenAt = course.log.length ? Math.max(...course.log.map((l) => l.at)) : null;
   const dayNumber = Math.max(1, Math.min(course.days, Math.floor((now - course.startAt) / DAY) + 1));
+  const nextAllowedAt = lastGivenAt === null ? null : lastGivenAt + minGapMs(course.schedule);
   return {
+    nextAllowedAt,
+    allowedNow: nextAllowedAt === null || nextAllowedAt <= now,
+    count24: course.log.filter((l) => l.at > now - DAY).length,
     slots,
     total,
     given: givenLogs.length,
@@ -142,6 +156,7 @@ export function courseState(course: Course, now: number): CourseState {
 }
 
 export function slotForLog(course: Course, now: number): { slot: number | null; early: boolean } {
+  if (course.mode === 'asNeeded') return { slot: null, early: false };
   const slots = slotTimes(course);
   const done = doneSlots(course);
   const reach = minGapMs(course.schedule) * 0.75;
@@ -169,6 +184,12 @@ function span(ms: number) {
   return m === 0 ? `${h} hour${h === 1 ? '' : 's'}` : `${h} h ${m} min`;
 }
 
+export function asNeededLabel(course: Pick<Course, 'schedule' | 'maxPer24'>) {
+  const hours = minGapMs(course.schedule) / HOUR;
+  const base = `As needed, at least ${hours} hour${hours === 1 ? '' : 's'} apart`;
+  return course.maxPer24 ? `${base}, no more than ${course.maxPer24} in 24 hours` : base;
+}
+
 export function scheduleLabel(schedule: Schedule) {
   if (schedule.kind === 'interval') return `Every ${schedule.hours} hour${schedule.hours === 1 ? '' : 's'}`;
   const times = schedule.times.map(clockLabel).join(', ');
@@ -187,6 +208,21 @@ export function doseWarnings(course: Course, now: number): DoseWarning[] {
   const warnings: DoseWarning[] = [];
   const state = courseState(course, now);
   const gap = minGapMs(course.schedule);
+  if (course.mode === 'asNeeded') {
+    if (state.lastGivenAt !== null && state.nextAllowedAt !== null && state.nextAllowedAt > now) {
+      warnings.push({
+        level: 'danger',
+        message: `The last dose was logged ${span(now - state.lastGivenAt)} ago. You entered at least ${span(gap)} between doses from the label, so the next dose is allowed at ${new Date(state.nextAllowedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`,
+      });
+    }
+    if (course.maxPer24 && state.count24 >= course.maxPer24) {
+      warnings.push({
+        level: 'danger',
+        message: `${state.count24} dose${state.count24 === 1 ? ' is' : 's are'} already logged in the last 24 hours, and you entered a limit of ${course.maxPer24} from the label.`,
+      });
+    }
+    return warnings;
+  }
   if (state.lastGivenAt !== null) {
     const since = now - state.lastGivenAt;
     if (since < gap * 0.75) {
@@ -226,10 +262,16 @@ export function courseSummary(course: Course, now: number): string {
   lines.push('');
   lines.push(`Medicine: ${course.medName}`);
   lines.push(`Dose as written on the pharmacy label: ${course.doseText}`);
-  lines.push(`Schedule as entered by the parent: ${scheduleLabel(course.schedule)}`);
-  lines.push(`Started: ${slotLabel(course.startAt)}`);
-  lines.push(`Course length entered: ${course.days} day${course.days === 1 ? '' : 's'} (${state.total} scheduled doses)`);
-  lines.push(`Doses logged as given: ${state.given} of ${state.total}`);
+  if (course.mode === 'asNeeded') {
+    lines.push(`Timing as entered by the parent from the label: ${asNeededLabel(course)}`);
+    lines.push(`Added: ${slotLabel(course.startAt)}`);
+    lines.push(`Doses logged as given: ${state.given + state.extra}`);
+  } else {
+    lines.push(`Schedule as entered by the parent: ${scheduleLabel(course.schedule)}`);
+    lines.push(`Started: ${slotLabel(course.startAt)}`);
+    lines.push(`Course length entered: ${course.days} day${course.days === 1 ? '' : 's'} (${state.total} scheduled doses)`);
+    lines.push(`Doses logged as given: ${state.given} of ${state.total}`);
+  }
   if (state.skipped) lines.push(`Doses marked skipped: ${state.skipped}`);
   if (state.stopped) lines.push(`Stopped on: ${slotLabel(course.stoppedAt as number)}`);
   lines.push('');
@@ -243,10 +285,12 @@ export function courseSummary(course: Course, now: number): string {
     lines.push(`  ${slotLabel(entry.at)}, given by ${entry.by || 'not noted'}${flags ? ` (${flags})` : ''}`);
   }
   lines.push('');
-  lines.push('Missed doses (no dose logged)');
-  if (state.missed.length === 0) lines.push('  (none)');
-  for (const i of state.missed) lines.push(`  Scheduled ${slotLabel(state.slots[i])}`);
-  lines.push('');
+  if (course.mode !== 'asNeeded') {
+    lines.push('Missed doses (no dose logged)');
+    if (state.missed.length === 0) lines.push('  (none)');
+    for (const i of state.missed) lines.push(`  Scheduled ${slotLabel(state.slots[i])}`);
+    lines.push('');
+  }
   lines.push('Side effects and notes');
   if (course.notes.length === 0) lines.push('  (none)');
   for (const note of [...course.notes].sort((a, b) => a.at - b.at)) lines.push(`  ${slotLabel(note.at)}: ${note.text}`);

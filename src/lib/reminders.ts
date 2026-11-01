@@ -106,6 +106,17 @@ async function rebuild() {
       if (!course.remind) continue;
       const state = courseState(course, now);
       if (state.finished) continue;
+      if (course.mode === 'asNeeded') {
+        if (state.nextAllowedAt !== null) {
+          await schedule(
+            `med-${course.id}-allowed`,
+            'Medicine reminder',
+            'The waiting time you entered from the label has passed. Open Lulla to check the label and your log.',
+            state.nextAllowedAt,
+          );
+        }
+        continue;
+      }
       const done = new Set<number>([...course.skipped, ...course.log.filter((l) => l.slot !== null).map((l) => l.slot as number)]);
       let scheduled = 0;
       for (let i = 0; i < state.slots.length && scheduled < MAX_SLOTS_PER_COURSE; i++) {

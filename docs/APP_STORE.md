@@ -12,15 +12,14 @@ This is an engineering checklist, not legal advice. Have the legal text reviewed
 | First words | 12 starter words, App voice | All 24 words, "My voice" recording |
 | First steps | Tummy time, rolling, sitting | Crawling, standing, walking |
 | Daily Play Plan | Plan by age, "We're exhausted today" mode | Interests, 15 and 45+ minute plans |
-| Antibiotic course tracker | Everything, including dose reminders | Everything |
+| Sick Day (medicine log with antibiotic courses, symptom log, when to call the doctor, comfort tips, package dosing charts, doctor summary) | Everything, including dose reminders | Everything |
 | Milestone tracker | Everything | Everything |
 | First foods and choking safety | Everything | Everything |
-| Medicine safety and dose log | Everything (when enabled) | Everything |
 | App lock, export, delete | Everything | Everything |
 
-Principle: safety and health-tracking features (milestones, food safety, the antibiotic course tracker and its reminders, medicine safety, privacy controls) are never paywalled. Plus is sold around sleep, memories, and family-friendly keepsakes, plus extra content and personalization.
+Principle: safety and health-tracking features (milestones, food safety, the whole Sick Day section and its reminders, privacy controls) are never paywalled. Plus is sold around sleep, memories, and family-friendly keepsakes, plus extra content and personalization.
 
-"Family-friendly" in the paywall means keepsake PDFs to share with grandparents and caregivers, voice clips from relatives in the memory book, and caregiver names on the course dose log. There is no cross-device family sync, because there are no accounts. Do not advertise syncing or shared logins.
+"Family-friendly" in the paywall means keepsake PDFs to share with grandparents and caregivers, voice clips from relatives in the memory book, and caregiver names on the medicine log. There is no cross-device family sync, because there are no accounts. Do not advertise syncing or shared logins.
 
 ### Pricing (US starting points)
 
@@ -46,15 +45,27 @@ Purchase modes (`src/lib/purchases.ts`):
 
 Production builds can never unlock Plus through the mock path.
 
+## Why Sick Day stays on the safe side of Guideline 1.4.1
+
+Guideline 1.4.1 targets apps whose inaccurate data or information could cause physical harm, and Apple has rejected apps that calculate drug doses unless they come from a qualifying publisher or have regulatory approval. Sick Day is built so that Lulla never produces, selects, or validates an amount:
+
+- **No calculation, no suggestion.** There is no weight field (it was deleted), no age-to-amount logic, no unit conversion, and no embedded dosing data. The old calculator, its tables, its flag, and its stored weight are gone.
+- **Every amount comes from the label.** The parent types the label dose and the label's waiting time (and optional daily limit). Dose text is stored as free text and only echoed back. Package charts are a photo the parent took or a table the parent typed. Lulla does not read the photo, does not pick a row for the baby, and ships no sample numbers (field placeholders say "as printed on the package").
+- **The "next allowed" time is timing, not dosage.** It is the last logged time plus the interval the parent typed. It never says how much to give, and the double-dose warning only compares log times with the typed interval and limit. It points the parent back to the label, pharmacist, and pediatrician.
+- **Confirm-with-a-professional is prominent.** It appears on every chart and photo (including the full-screen view), on the medicine screens, and in the medical disclaimer. Under 3 months, the medicine screens tell parents to call before giving any medicine.
+- **Non-dosing safety rules only**, each cited: no aspirin, check active ingredients, use the supplied syringe, call before medicine under 3 months, no over-the-counter cough and cold medicine under 4, no honey under 12 months, lock medicine away, Poison Control number.
+- **Guidance is informational and cited.** Red flags and comfort tips quote AAP, CDC, FDA, and NHS pages, show the source on every item, and say they are not a diagnosis. There is a "call 911" tier.
+- **Residual risk.** Apple decides case by case. If a reviewer treats timing checks as dosing help, the fallback in known risk 1 applies.
+
 ## Privacy by design
 
 - No accounts, no ads, no analytics, no third-party SDKs except RevenueCat (purchases only), and no tracking. No `NSPrivacyTracking`, no tracking domains, so no App Tracking Transparency prompt is needed.
-- The baby profile, milestones, and dose log are stored only on the device. Nothing is sent to a Lulla server (there is none).
-- New in this version, all local: sleep log (90 days), medicine courses and dose logs, memory text, photos, and voice clips. Reminders are local notifications created on the phone and routed through no server. Keepsake and doctor PDFs are generated on the device by `expo-print`.
+- The baby profile, milestones, and Sick Day logs are stored only on the device. Nothing is sent to a Lulla server (there is none).
+- New in this version, all local: sleep log (90 days), Sick Day logs (medicine log, symptom log, package chart text and photos), memory text, photos, and voice clips. Reminders are local notifications created on the phone and routed through no server. Keepsake and doctor PDFs are generated on the device by `expo-print`.
 - Notifications never reveal the medicine name or baby's information: medicine reminders say "Medicine reminder", sleep reminders say a window is opening.
-- Data minimization: the baby's name is optional; the dose log auto-deletes entries after 7 days; weight and birth date are validated and clamped.
+- Data minimization: the baby's name is optional; Lulla no longer asks for or stores the baby's weight (it was only used by the removed calculator, and an old stored value is erased on first launch); illness logs are kept for one year, finished medicines about five months; birth date is validated and clamped.
 - Photos are resized before saving (`expo-image-manipulator`) and kept only in the app's private folder. Memory voice clips are limited to 60 seconds. Voice recordings are saved as local files, are never uploaded, and are deleted when you remove them or use Delete all data.
-- User controls in Settings: export all data (JSON), delete all data (profile, milestones, dose log, recordings, app lock), and links to the privacy policy, terms, and medical disclaimer.
+- User controls in Settings: export all data (JSON), delete all data (profile, milestones, sleep, Sick Day logs and package charts, memories, recordings, app lock), and links to the privacy policy, terms, and medical disclaimer.
 - The microphone is requested only when the user taps record. The photo library and camera are requested only when the user taps Choose photos or Take a photo (the picker is limited to the photos the user selects). Notifications are requested only when the user turns on a reminder. Face ID is requested only if the user turns on App lock. The notifications plugin is set with `enableRemoteNotifications: false`, so there is no push entitlement and no APNs registration.
 
 ### App Privacy "nutrition label" (App Store Connect)
@@ -69,9 +80,9 @@ The in-app privacy policy (`src/data/legal.ts`) matches this. Export it for host
 
 ## Security by design
 
-- Sensitive data (baby profile, dose log, sleep log, medicine courses, memory text, app-lock flag) is in the iOS Keychain / Android Keystore via `expo-secure-store`, with `WHEN_UNLOCKED_THIS_DEVICE_ONLY` so it is not synced to iCloud or restored to another device. Values are chunked to stay within store limits (`src/lib/secureStorage.ts`).
+- Sensitive data (baby profile, sleep log, medicine log, symptom log, package chart text, memory text, app-lock flag) is in the iOS Keychain / Android Keystore via `expo-secure-store`, with `WHEN_UNLOCKED_THIS_DEVICE_ONLY` so it is not synced to iCloud or restored to another device. Values are chunked to stay within store limits (`src/lib/secureStorage.ts`).
 - Existing data from earlier versions is migrated from AsyncStorage into secure storage once and the legacy copy is removed.
-- Everything read from storage is validated and clamped (`sanitizeProfile`, `sanitize` in the dose log) so corrupt or tampered values cannot crash the app or produce unsafe doses.
+- Everything read from storage is validated and clamped (`sanitizeProfile`, `sanitizeCourse`, `sanitizeIllness`, `sanitizeCharts`) so corrupt or tampered values cannot crash the app. Lulla never produces a dose, so there is no computed amount to corrupt.
 - Photos and voice clips are files in the app sandbox, protected by the phone's device encryption (they are not Keychain items, and may be in encrypted device backups). Only bare file names are stored in the memory records, so references survive iOS container path changes. `Delete all data` removes the folder.
 - Optional App lock with Face ID / Touch ID / device passcode (`expo-local-authentication`). The app is covered while locked and when it goes to the background, so the app-switcher preview shows no data.
 - Android auto-backup is disabled (`allowBackup: false`), and iOS secure items are device-only, so health-adjacent data is not copied into cloud backups.
@@ -83,8 +94,7 @@ The in-app privacy policy (`src/data/legal.ts`) matches this. Export it for host
 
 | Guideline | How it is handled |
 | --- | --- |
-| 1.4.1 Physical harm (medical info) | Medicine dosing page uses published AAP tables, enforces age limits, and has a disclaimer and sources. **High review risk, see below.** |
-| 1.4.1 Course tracker | The antibiotic tracker is a log, not a calculator: the parent types the medicine, dose, and schedule exactly as on the pharmacy label, Lulla echoes it back, and never computes, suggests, converts, or validates an amount. A confirmation switch states the entry matches the label. Safety copy: follow the pharmacist and pediatrician, call if a dose is missed or vomited. The double-dose warning compares log times to the schedule the parent entered, nothing else. |
+| 1.4.1 Physical harm (medical info): Sick Day | Sick Day is a tracker and a reference to public guidance, not a dosing tool. See "Why Sick Day stays on the safe side of Guideline 1.4.1" above. |
 | 2.1 Completeness | No placeholder content, working restore, demo notes below. |
 | 3.1.1 / 3.1.2 In-App Purchase and subscriptions | Store-native IAP via RevenueCat. Paywall shows price, billing period, trial length, the auto-renewal disclosure, Restore Purchases, Terms and Privacy links, and a Manage subscription link. |
 | 4.2 Minimum functionality | Many native features: audio with background playback, offline content, secure storage, biometrics. |
@@ -97,7 +107,7 @@ The in-app privacy policy (`src/data/legal.ts`) matches this. Export it for host
 
 ### Known risks and open items
 
-1. **Medicine dosing (Guideline 1.4.1).** Apple has rejected apps that calculate drug doses unless published by a hospital, insurer, pharmacy, or similar qualifying organization, or backed by regulatory approval. The page is behind `EXPO_PUBLIC_ENABLE_MEDICINE_DOSES` and the **production EAS profile turns it off**. When it is off, the page shows a neutral "not available" message. To ship it, you need a qualifying publisher, or a review-notes justification Apple accepts. Test with `preview` builds; decide before flipping the production flag.
+1. **Medicine content (Guideline 1.4.1).** The old weight-based calculator and its dosing tables were removed entirely, so there is no flag to flip and nothing dose-related to disable in production. The remaining risk is a reviewer reading the medicine log as a dosing feature. The reasoning that it is not one is below. Mitigations: keep the review notes, never add amounts, weight, or age-based recommendations, and keep every entry typed by the parent from the label. If Apple still objects, the lowest-risk fallback is removing the "next allowed" timing and keeping only the log.
 2. **Voice clips.** The bundled First words clips were generated with `edge-tts` (Microsoft neural voices). Check that license allows commercial redistribution inside an app before release, or regenerate with a voice you license (ElevenLabs, Azure TTS with a commercial plan, or a recorded voice actor) using `npm run voices`.
 3. **Legal entity and bundle ID.** `com.lulla.app` is a placeholder. Use your real bundle ID and your legal name in the policy and terms, and fill in a support email and contact.
 4. **Hosted policy URLs** are required (see above). Add a support URL in App Store Connect.
@@ -108,11 +118,12 @@ The in-app privacy policy (`src/data/legal.ts`) matches this. Export it for host
 9. **Reminder reliability.** Local notifications can fail if the user denies permission or enables Focus modes. The UI says reminders are an aid and the log is the record. iOS keeps at most 64 pending notifications, so Lulla schedules the next 6 doses per course (each with a 45-minute follow-up) plus one sleep reminder.
 10. **Sleep guidance.** Wake windows are widely used coaching ranges, not clinical standards (total sleep ranges cite AASM and the National Sleep Foundation). The UI labels them as typical ranges and repeats safe-sleep guidance.
 11. **Dependency audit.** `npm audit` reports moderate issues only in build/lint tooling (Expo CLI, eslint: `glob`, `minimatch`). They are not shipped in the app. The remaining fixes need `--force` (breaking), so wait for Expo SDK patch releases.
-12. Legal text is a good-faith draft written for this app's behavior. A lawyer should review it, especially the medical disclaimer, and refund wording.
+12. **Clinical content review.** The red-flag lists and comfort tips in `src/data/sickGuide.ts` summarize AAP (HealthyChildren.org), CDC, FDA, and NHS pages as they read when written (October 2026), and each item shows its source. Thresholds differ slightly between organizations (for example 3 to 6 months: AAP says to call at 101 F / 38.3 C, the NHS at 102.2 F / 39 C). Lulla uses the AAP numbers and says so. Have a pediatrician or pharmacist review the wording before release, and re-check the source pages periodically.
+13. Legal text is a good-faith draft written for this app's behavior. A lawyer should review it, especially the medical disclaimer, and refund wording.
 
 ### Suggested review notes (App Store Connect)
 
-> Lulla is a parenting app: sleep sounds and a sleep log, a memory book, early-language and movement activities, a milestone checklist, a food safety guide, and a medicine course tracker (a log of doses the parent enters from the pharmacy label; it does not calculate or suggest doses). It has no accounts. All baby information stays on the device. Lulla Plus (monthly, yearly with 7-day trial, lifetime) unlocks extra sounds, words, and steps; safety content is always free. To test: open Home, tap Lulla Plus or any locked item, and use the sandbox account to buy or restore. Medical information is general guidance cited to the AAP and CDC and is not a substitute for a clinician.
+> Lulla is a parenting app: sleep sounds and a sleep log, a memory book, early-language and movement activities, a milestone checklist, a food safety guide, and Sick Day, a free section with a medicine log, a symptom log, cited "when to call the doctor" lists, comfort tips, saved package dosing charts, and a doctor summary. Sick Day does not calculate, suggest, convert, or verify any dose or amount: the parent types the medicine, label dose, and waiting time from the label, or saves a photo or typed copy of the chart printed on the package, and every chart carries a "confirm with your pediatrician or pharmacist" note. It does not diagnose. It has no accounts. All baby information stays on the device. Lulla Plus (monthly, yearly with 7-day trial, lifetime) unlocks extra sounds, words, steps, sleep predictions, and unlimited memories; safety content is always free. To test: open Home > Sick Day, add a medicine from a label, log a dose, and start a symptom log. To test purchases, tap Lulla Plus on Home and use the sandbox account. Medical information is general guidance cited to the AAP, CDC, FDA, and NHS and is not a substitute for a clinician.
 
 ## Release checklist
 

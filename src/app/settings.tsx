@@ -126,7 +126,7 @@ export default function SettingsScreen() {
               <View style={styles.confirm}>
                 <Text style={styles.confirmTitle}>Delete everything?</Text>
                 <Text style={styles.confirmBody}>
-                  This permanently erases your baby profile, milestones, sleep log, medicine courses and dose logs, memories
+                  This permanently erases your baby profile, milestones, sleep log, Sick Day logs and package charts, medicines, memories
                   (photos and voice clips), voice recordings, scheduled reminders, and app lock setting from this device. It can’t be undone. Your Lulla Plus purchase is not affected.
                 </Text>
                 <View style={styles.confirmRow}>

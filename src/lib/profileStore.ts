@@ -15,9 +15,6 @@ export const defaultProfile = (): BabyProfile => ({
   configured: false,
   tiredDate: null,
   achieved: {},
-  weightKg: null,
-  weightDate: null,
-  weightUnit: 'lb',
 });
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -63,9 +60,6 @@ export function sanitizeProfile(raw: unknown): BabyProfile {
     configured: r.configured === true,
     tiredDate: date(r.tiredDate),
     achieved,
-    weightKg: num(r.weightKg, 1, 60),
-    weightDate: date(r.weightDate),
-    weightUnit: r.weightUnit === 'kg' ? 'kg' : 'lb',
   };
 }
 
@@ -77,7 +71,11 @@ export function loadProfile(): Promise<BabyProfile> {
       .then((raw) => {
         if (!raw) return defaultProfile();
         try {
-          return sanitizeProfile(JSON.parse(raw));
+          const parsed = JSON.parse(raw) as Record<string, unknown>;
+          const clean = sanitizeProfile(parsed);
+          // Weight was only used by the removed dose calculator, so it is dropped from storage.
+          if (parsed && 'weightKg' in parsed) secureSet(PROFILE_KEY, JSON.stringify(clean)).catch(() => {});
+          return clean;
         } catch {
           return defaultProfile();
         }

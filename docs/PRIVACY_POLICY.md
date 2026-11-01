@@ -12,20 +12,21 @@ Lulla is built so that your baby’s information stays with you. There are no ac
 
 ## What Lulla stores on your device
 
-- Baby profile: an optional name, birth date or age, weight, interests, and your preferred play time.
+- Baby profile: an optional name, birth date or age, interests, and your preferred play time. Lulla does not ask for or store your baby’s weight.
 - Milestones: the milestones you check off and the date you checked them.
-- Medicine dose log: the medicine, amount, and time of doses you log. Entries are deleted automatically after 7 days.
 - Sleep log: the start and end times of the naps and night sleep you log, kept for up to 90 days, and your sleep reminder choices.
-- Medicine courses: the medicine name, dose, and schedule exactly as you type them from the pharmacy label, your dose log with the names you enter for who gave each dose, and side-effect notes. Lulla never calculates or suggests a dose.
+- Sick Day medicine log: the medicine name, dose, waiting time, and schedule exactly as you type them from the label, your log of doses given with the names you enter for who gave each dose, and notes. This includes antibiotic courses and as-needed medicines such as fever reducers. Lulla never calculates or suggests a dose.
+- Sick Day symptom log: illness episodes you start, with the temperatures (and how they were taken), fluids, wet diapers, sleep notes, behavior, and notes you enter, as a timeline.
+- Package dosing charts: the product name, ingredient, any table you type from the package, and any photo of the package chart you choose to save. Lulla does not read the photo or interpret the chart.
 - Memory book: the titles, notes, and dates you write, plus any photos and voice clips you attach. Photos are resized and saved as files in the app’s private storage.
 - Settings: whether app lock is on, and your Lulla Plus status.
 - Voice recordings: only if you choose to record your voice for First words. Recordings are saved as files on your device and are never uploaded.
 
 ## How it is protected
 
-- Your baby profile, milestones, weight, dose log, sleep log, medicine courses, and memory text are kept in the secure storage built into your phone (the iOS Keychain, or the Android Keystore). On iPhone these items are set to this-device-only, so they are not copied to iCloud backups or to a new device.
+- Your baby profile, milestones, sleep log, medicine log, symptom log, package chart text, and memory text are kept in the secure storage built into your phone (the iOS Keychain, or the Android Keystore). On iPhone these items are set to this-device-only, so they are not copied to iCloud backups or to a new device.
 - You can turn on an app lock in Settings. Lulla then asks for Face ID, Touch ID, or your device passcode when you open it, and hides its screen in the app switcher. Lulla never receives your biometric data; your phone handles it.
-- Photos, memory voice clips, and First words voice recordings are stored as files in the app’s private storage, which your phone protects with device encryption and which may be included in your encrypted device backups.
+- Photos of memories and package charts, memory voice clips, and First words voice recordings are stored as files in the app’s private storage, which your phone protects with device encryption and which may be included in your encrypted device backups.
 - Reminders are local notifications created on your phone. Medicine reminders say only “Medicine reminder,” so the medicine name never appears on your lock screen. Reminders are not sent through any server.
 
 ## What leaves your device
@@ -33,7 +34,7 @@ Lulla is built so that your baby’s information stays with you. There are no ac
 - Nothing you enter about your baby is sent to us or to anyone else.
 - Lulla Plus purchases are handled by Apple. We use RevenueCat to confirm whether a purchase is active. RevenueCat receives an anonymous app user ID, your purchase and subscription status, and standard technical information such as your IP address, device model, and app version. It does not receive your baby’s information.
 - The microphone is used only while you press record. Audio is not sent anywhere.
-- Photos are read only when you choose them from your library or take them with the camera. Lulla saves a resized copy and never uploads it. When you export a keepsake PDF or a medicine summary, the PDF is made on your phone and goes only where you choose to share it.
+- Photos are read only when you choose them from your library or take them with the camera. Lulla saves a resized copy and never uploads it. When you export a keepsake PDF, a medicine record, or a Sick Day doctor summary, the text or PDF is made on your phone and goes only where you choose to share it.
 
 ## Children’s privacy
 
@@ -42,13 +43,13 @@ Lulla is built so that your baby’s information stays with you. There are no ac
 ## Your choices
 
 - You can change or remove anything in the app at any time.
-- In Settings, “Export my data” gives you a copy of what Lulla stores, and “Delete all my data” erases the profile, milestones, dose log, sleep log, medicine courses, memories with their photos and voice clips, voice recordings, scheduled reminders, and app lock setting from your device.
+- In Settings, “Export my data” gives you a copy of what Lulla stores, and “Delete all my data” erases the profile, milestones, sleep log, medicine log, symptom log, package dosing charts, memories with their photos and voice clips, voice recordings, scheduled reminders, and app lock setting from your device.
 - On iPhone, Keychain items can remain after an app is deleted. For a complete removal, use “Delete all my data” before you uninstall Lulla.
 - Lulla Plus subscriptions can be managed or canceled in your Apple ID account settings.
 
 ## Keeping data
 
-- Your information is kept on your device until you delete it. Dose log entries expire after 7 days, sleep entries after 90 days, and finished medicine courses after about five months. Memories stay until you delete them. Purchase records are kept by Apple and RevenueCat under their own policies.
+- Your information is kept on your device until you delete it. Sleep entries expire after 90 days, finished medicines after about five months, and illness logs after one year. Memories stay until you delete them. Purchase records are kept by Apple and RevenueCat under their own policies.
 
 ## Changes to this policy
 

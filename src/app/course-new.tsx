@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Switch, Text, View } from 'react-native';
 import { Body, Btn, Chip, Field, Notice, Panel, Screen, Section, Stepper, Title, uiStyles } from '@/components/ui';
 import { colors } from '@/constants/theme';
 import { courseDisclaimer } from '@/data/courses';
+import { sickDisclaimer } from '@/data/sickGuide';
 import { useCourses } from '@/hooks/useCourses';
-import { clockLabel, MAX_DAYS, MAX_TIMES, sanitizeText, type Schedule } from '@/lib/courseLogic';
+import { clockLabel, MAX_DAYS, MAX_TIMES, sanitizeText, type MedMode, type Schedule } from '@/lib/courseLogic';
+import { nowMs } from '@/lib/time';
 import { ensureNotificationPermission, remindersSupported } from '@/lib/reminders';
 
 function roundedNow() {
@@ -24,7 +26,12 @@ function dayLabel(offset: number) {
 
 export default function NewCourseScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ mode?: string }>();
   const { add } = useCourses();
+  const [medMode, setMedMode] = useState<MedMode>(params.mode === 'course' ? 'course' : 'asNeeded');
+  const [minHours, setMinHours] = useState(6);
+  const [maxPer24, setMaxPer24] = useState(0);
+  const asNeeded = medMode === 'asNeeded';
   const [medName, setMedName] = useState('');
   const [doseText, setDoseText] = useState('');
   const [mode, setMode] = useState<'times' | 'interval'>('times');
@@ -46,11 +53,14 @@ export default function NewCourseScreen() {
 
   const save = async () => {
     if (!canSave) return;
-    const start = new Date();
+    const start = new Date(nowMs());
     start.setDate(start.getDate() + dayOffset);
     start.setHours(Math.floor(firstTime / 60), firstTime % 60, 0, 0);
-    const schedule: Schedule =
-      mode === 'times' ? { kind: 'times', times: Array.from(new Set(times)).sort((a, b) => a - b) } : { kind: 'interval', hours };
+    const schedule: Schedule = asNeeded
+      ? { kind: 'interval', hours: minHours }
+      : mode === 'times'
+        ? { kind: 'times', times: Array.from(new Set(times)).sort((a, b) => a - b) }
+        : { kind: 'interval', hours };
     let wantReminders = remind;
     if (remind && remindersSupported) {
       const ok = await ensureNotificationPermission();
@@ -60,22 +70,36 @@ export default function NewCourseScreen() {
       }
     }
     const id = add({
+      mode: medMode,
+      maxPer24: asNeeded && maxPer24 > 0 ? maxPer24 : null,
       medName: sanitizeText(medName, 60),
       doseText: sanitizeText(doseText, 80),
       schedule,
-      startAt: start.getTime(),
-      days,
+      startAt: asNeeded ? nowMs() : start.getTime(),
+      days: asNeeded ? 1 : days,
       remind: wantReminders,
     });
     router.replace({ pathname: '/course', params: { id } });
   };
 
   return (
-    <Screen gradient={['#1E2F33', '#26474A', '#2F5E55']} back="← Courses" backTo="/antibiotics">
-      <Title sub="Copy these from the pharmacy label, exactly as written.">New medicine course</Title>
+    <Screen gradient={['#1E2F33', '#26474A', '#2F5E55']} back="← Medicine log" backTo="/sick-meds">
+      <Title sub="Copy these from the label, exactly as written.">{asNeeded ? 'Add a medicine' : 'New medicine course'}</Title>
+
+      <Panel>
+        <View style={uiStyles.wrap}>
+          <Chip label="As needed (fever reducer, etc.)" selected={asNeeded} onPress={() => setMedMode('asNeeded')} />
+          <Chip label="Course with a schedule (antibiotic)" selected={!asNeeded} onPress={() => setMedMode('course')} />
+        </View>
+        <Body tone="muted">
+          {asNeeded
+            ? 'For medicine given when needed, with a minimum wait between doses printed on the label.'
+            : 'For a prescribed course with set times and a number of days.'}
+        </Body>
+      </Panel>
 
       <Notice tone="warn" title="Enter, don’t calculate">
-        {courseDisclaimer}
+        {asNeeded ? sickDisclaimer : courseDisclaimer}
       </Notice>
 
       <Panel>
@@ -90,6 +114,35 @@ export default function NewCourseScreen() {
         />
       </Panel>
 
+      {asNeeded ? (
+        <>
+          <Section>Waiting time from the label</Section>
+          <Panel>
+            <Stepper
+              label="At least this long between doses"
+              value={`${minHours} hour${minHours === 1 ? '' : 's'}`}
+              onMinus={() => setMinHours((h) => Math.max(1, h - 1))}
+              onPlus={() => setMinHours((h) => Math.min(24, h + 1))}
+              minusDisabled={minHours <= 1}
+              plusDisabled={minHours >= 24}
+            />
+            <Stepper
+              label="No more than (in 24 hours)"
+              value={maxPer24 === 0 ? 'Not on the label' : `${maxPer24} dose${maxPer24 === 1 ? '' : 's'}`}
+              onMinus={() => setMaxPer24((n) => Math.max(0, n - 1))}
+              onPlus={() => setMaxPer24((n) => Math.min(12, n + 1))}
+              minusDisabled={maxPer24 <= 0}
+              plusDisabled={maxPer24 >= 12}
+            />
+            <Body tone="muted">
+              Use the interval and the daily limit printed on the label (for example “every 6 hours, no more than 4 doses in 24 hours”). Lulla only times your log against these numbers.
+            </Body>
+          </Panel>
+        </>
+      ) : null}
+
+      {!asNeeded ? (
+        <>
       <Section>Schedule from the label</Section>
       <Panel>
         <View style={uiStyles.wrap}>
@@ -151,18 +204,22 @@ export default function NewCourseScreen() {
         />
         <Body tone="muted">Use the number of days on the label. Lulla counts down to the last dose.</Body>
       </Panel>
+        </>
+      ) : null}
 
       <Section>Reminders</Section>
       <Panel>
         <View style={uiStyles.row}>
           <View style={uiStyles.flex}>
-            <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 15, color: colors.foam }}>Remind me at each dose time</Text>
+            <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 15, color: colors.foam }}>
+              {asNeeded ? 'Remind me when the next dose is allowed' : 'Remind me at each dose time'}
+            </Text>
             <Body tone="muted">
               Local notifications on this phone. They say “Medicine reminder” and never show the medicine name on your lock screen.
             </Body>
           </View>
           <Switch
-            accessibilityLabel="Remind me at each dose time"
+            accessibilityLabel="Reminders"
             value={remind}
             onValueChange={setRemind}
             trackColor={{ true: colors.butter, false: 'rgba(255,255,255,0.2)' }}
@@ -175,7 +232,7 @@ export default function NewCourseScreen() {
         <View style={uiStyles.row}>
           <View style={uiStyles.flex}>
             <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 15, color: colors.foam }}>
-              I entered the medicine, dose, and schedule exactly as written on the label.
+              I entered the medicine, dose, and timing exactly as written on the label.
             </Text>
           </View>
           <Switch
@@ -188,7 +245,7 @@ export default function NewCourseScreen() {
       </Panel>
 
       {note ? <Body tone="warn">{note}</Body> : null}
-      <Btn label="Start tracking" onPress={save} disabled={!canSave} />
+      <Btn label={asNeeded ? 'Save medicine' : 'Start tracking'} onPress={save} disabled={!canSave} />
       {!canSave ? (
         <Body tone="muted">
           {!nameOk ? 'Add the medicine name. ' : ''}

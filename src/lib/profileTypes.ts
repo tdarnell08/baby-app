@@ -12,7 +12,4 @@ export type BabyProfile = {
   configured: boolean;
   tiredDate: string | null;
   achieved: Record<string, string>;
-  weightKg: number | null;
-  weightDate: string | null;
-  weightUnit: 'lb' | 'kg';
 };

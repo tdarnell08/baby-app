@@ -67,11 +67,6 @@ export function useBabyProfile() {
     [update],
   );
 
-  const setWeight = useCallback(
-    (kg: number | null) => update({ weightKg: kg, weightDate: kg === null ? null : dateKey(new Date()) }),
-    [update],
-  );
-
   const toggleMilestone = useCallback((id: string) => {
     setProfile((prev) => {
       const achieved = { ...prev.achieved };
@@ -127,7 +122,6 @@ export function useBabyProfile() {
     setAge,
     setBirthDate,
     setTired,
-    setWeight,
     toggleMilestone,
   };
 }

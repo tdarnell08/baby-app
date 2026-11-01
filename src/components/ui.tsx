@@ -24,7 +24,7 @@ export function Screen({
   gradient: [string, string, string];
   children: ReactNode;
   back?: string;
-  backTo?: '/' | '/coach' | '/memories' | '/antibiotics' | '/sleep';
+  backTo?: '/' | '/coach' | '/memories' | '/sleep' | '/sick' | '/sick-meds' | '/sick-charts' | '/sick-symptoms';
 }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();

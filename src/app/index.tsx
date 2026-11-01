@@ -6,7 +6,6 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { BreathingOrb } from '@/components/BreathingOrb';
 import { HomeTiles } from '@/components/HomeTiles';
 import { PlanCard } from '@/components/PlanCard';
-import { config } from '@/config';
 import { usePremium } from '@/providers/PremiumProvider';
 import { Starfield } from '@/components/Starfield';
 import { colors, radii, spacing } from '@/constants/theme';
@@ -37,21 +36,11 @@ const actions = [
     primary: false,
   },
   {
-    href: '/antibiotics' as const,
-    label: 'Antibiotic course tracker',
-    hint: 'Log every dose, get reminders, count down to the last one',
+    href: '/sick' as const,
+    label: 'Sick Day',
+    hint: 'Medicine log, symptoms, when to call the doctor. Always free.',
     primary: false,
   },
-  ...(config.medicineDoses
-    ? [
-        {
-          href: '/medicine' as const,
-          label: 'Medicine doses',
-          hint: 'Weight-based fever and pain doses, with a dose log',
-          primary: false,
-        },
-      ]
-    : []),
 ];
 
 export default function HomeScreen() {

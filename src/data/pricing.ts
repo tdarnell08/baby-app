@@ -61,10 +61,9 @@ export const featureTable: FeatureRow[] = [
   { label: 'First words', free: '12 starter words, App voice', plus: 'All 24 words and “My voice” recording' },
   { label: 'First steps', free: 'Tummy time, rolling, sitting', plus: 'Crawling, standing, and walking' },
   { label: 'Daily Play Plan', free: 'Plan by age, plus the exhausted mode', plus: 'Interests and 15 or 45+ minute plans' },
-  { label: 'Antibiotic course tracker', free: 'Everything, with dose reminders', plus: 'Everything' },
+  { label: 'Sick Day: medicine log, symptom log, when to call the doctor, comfort tips, package dosing charts, doctor summary', free: 'Everything, including dose reminders', plus: 'Everything' },
   { label: 'Milestone tracker', free: 'Everything', plus: 'Everything' },
   { label: 'First foods and choking safety', free: 'Everything', plus: 'Everything' },
-  { label: 'Medicine safety and dose log', free: 'Everything (when enabled)', plus: 'Everything' },
   { label: 'App lock, data export and delete', free: 'Everything', plus: 'Everything' },
 ];
 
@@ -77,7 +76,7 @@ export const plusBenefits: Benefit[] = [
 ];
 
 export const freePromise =
-  'Safety and health tracking are always free: milestones, food and choking safety, the antibiotic course tracker with reminders, medicine safety, and privacy and security controls.';
+  'Safety and health tracking are always free: milestones, food and choking safety, the whole Sick Day section (medicine log with reminders, symptom log, when to call the doctor, comfort tips, and doctor summary), and privacy and security controls.';
 
 export const paywallDisclosure =
   'Payment is charged to your Apple ID account at confirmation of purchase. Subscriptions renew automatically unless canceled at least 24 hours before the end of the current period. Your account is charged for renewal within 24 hours before the period ends. Manage or cancel any time in your Apple ID account settings after purchase. Any free trial ends when you subscribe, and an unused part of a trial is forfeited. Lifetime is a one-time purchase and does not renew.';

@@ -6,6 +6,7 @@ import { deleteFileQuietly } from '@/lib/files';
 const isWeb = Platform.OS === 'web';
 export const MEDIA_DIR = 'lulla-media';
 const MAX_PHOTO_WIDTH = 1200;
+const MAX_READABLE_WIDTH = 1800;
 
 function nextName(ext: string) {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
@@ -27,8 +28,8 @@ async function blobToDataUri(uri: string): Promise<string> {
   });
 }
 
-export async function savePhoto(uri: string, width?: number): Promise<string> {
-  const target = isWeb ? 640 : MAX_PHOTO_WIDTH;
+export async function savePhoto(uri: string, width?: number, readable = false): Promise<string> {
+  const target = isWeb ? (readable ? 900 : 640) : readable ? MAX_READABLE_WIDTH : MAX_PHOTO_WIDTH;
   const context = ImageManipulator.manipulate(uri);
   if (width && width > target) context.resize({ width: target });
   const rendered = await context.renderAsync();

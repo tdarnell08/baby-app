@@ -1,6 +1,8 @@
-import { loadMedLog, wipeMedLog } from '@/hooks/useMedLog';
 import { wipeParentVoices } from '@/hooks/useParentVoice';
+import { loadCharts, wipeCharts } from '@/lib/chartStore';
 import { loadCourses, wipeCourses } from '@/lib/courseStore';
+import { fmtBoth } from '@/lib/illnessLogic';
+import { loadIllness, wipeIllness } from '@/lib/illnessStore';
 import { wipeMediaFiles } from '@/lib/media';
 import { loadMemories, wipeMemories } from '@/lib/memoryStore';
 import { loadProfile, wipeProfile } from '@/lib/profileStore';
@@ -8,12 +10,13 @@ import { cancelAllReminders } from '@/lib/reminders';
 import { loadSleep, wipeSleep } from '@/lib/sleepStore';
 
 export async function buildExport(): Promise<string> {
-  const [profile, doseLog, sleep, courses, memories] = await Promise.all([
+  const [profile, sleep, courses, memories, illness, charts] = await Promise.all([
     loadProfile(),
-    loadMedLog(),
     loadSleep(),
     loadCourses(),
     loadMemories(),
+    loadIllness(),
+    loadCharts(),
   ]);
   return JSON.stringify(
     {
@@ -24,23 +27,18 @@ export async function buildExport(): Promise<string> {
         name: profile.name || null,
         birthDate: profile.birthDate,
         ageMonthsEntered: profile.ageMonths,
-        weightKg: profile.weightKg,
-        weightSavedOn: profile.weightDate,
         interests: profile.interests,
         playTime: profile.time,
       },
       milestonesChecked: profile.achieved,
-      medicineDoseLog: doseLog.map((d) => ({
-        medicine: d.med,
-        amountMl: d.ml,
-        givenAt: new Date(d.at).toISOString(),
-      })),
       sleepLog: sleep.map((s) => ({
         kind: s.kind,
         start: new Date(s.start).toISOString(),
         end: s.end ? new Date(s.end).toISOString() : null,
       })),
       medicineCourses: courses.courses.map((c) => ({
+        type: c.mode === 'asNeeded' ? 'as needed' : 'course',
+        maxDosesPer24HoursFromLabel: c.maxPer24,
         medicine: c.medName,
         doseAsWrittenOnLabel: c.doseText,
         schedule: c.schedule,
@@ -59,6 +57,26 @@ export async function buildExport(): Promise<string> {
         notes: c.notes.map((n) => ({ at: new Date(n.at).toISOString(), text: n.text })),
       })),
       caregiverNames: courses.caregivers,
+      sickDayEpisodes: illness.episodes.map((e) => ({
+        illness: e.title,
+        startedAt: new Date(e.startedAt).toISOString(),
+        endedAt: e.endedAt ? new Date(e.endedAt).toISOString() : null,
+        entries: e.entries.map((x) => ({
+          at: new Date(x.at).toISOString(),
+          kind: x.kind,
+          temperature: x.tempC === null ? null : fmtBoth(x.tempC),
+          method: x.method,
+          wetDiapers: x.count,
+          text: x.text || null,
+        })),
+      })),
+      medicineChartsFromPackages: charts.map((c) => ({
+        name: c.name,
+        activeIngredient: c.activeIngredient || null,
+        note: c.note || null,
+        rowsTypedByParent: c.rows,
+        photos: c.photos.length,
+      })),
       memories: memories.map((m) => ({
         kind: m.kind,
         title: m.title,
@@ -77,10 +95,11 @@ export async function buildExport(): Promise<string> {
 export async function deleteEverything(): Promise<void> {
   await Promise.allSettled([
     wipeProfile(),
-    wipeMedLog(),
     wipeParentVoices(),
     wipeSleep(),
     wipeCourses(),
+    wipeIllness(),
+    wipeCharts(),
     wipeMemories(),
     wipeMediaFiles(),
     cancelAllReminders(),

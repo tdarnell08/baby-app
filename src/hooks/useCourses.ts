@@ -6,7 +6,7 @@ import { syncReminders } from '@/lib/reminders';
 
 const empty: CourseData = { courses: [], caregivers: [] };
 
-export type NewCourse = Pick<Course, 'medName' | 'doseText' | 'schedule' | 'startAt' | 'days' | 'remind'>;
+export type NewCourse = Pick<Course, 'mode' | 'maxPer24' | 'medName' | 'doseText' | 'schedule' | 'startAt' | 'days' | 'remind'>;
 
 export function useCourses() {
   const [data, setData] = useState<CourseData>(empty);

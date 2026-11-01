@@ -6,8 +6,10 @@ import {
   type Course,
   type CourseNote,
   type DoseLog,
+  type MedMode,
   type Schedule,
 } from '@/lib/courseLogic';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { secureDelete, secureGet, secureSet } from '@/lib/secureStorage';
 
 export const COURSES_KEY = 'lulla.courses.v1';
@@ -75,8 +77,15 @@ function sanitizeCourse(raw: unknown, now: number): Course | null {
       if (typeof n.id === 'string' && n.id.length <= 60 && isNum(n.at) && text) notes.push({ id: n.id, at: n.at, text });
     }
   }
+  const mode: MedMode = r.mode === 'asNeeded' ? 'asNeeded' : 'course';
+  const maxPer24 =
+    mode === 'asNeeded' && isNum(r.maxPer24) && Number.isInteger(r.maxPer24) && r.maxPer24 >= 1 && r.maxPer24 <= 12
+      ? r.maxPer24
+      : null;
   return {
     id: r.id,
+    mode,
+    maxPer24,
     medName,
     doseText,
     schedule,
@@ -91,6 +100,10 @@ function sanitizeCourse(raw: unknown, now: number): Course | null {
   };
 }
 
+function lastActivity(c: Course) {
+  return Math.max(c.startAt, ...c.log.map((l) => l.at));
+}
+
 export function sanitizeCourseData(raw: unknown, now = Date.now()): CourseData {
   if (typeof raw !== 'object' || raw === null) return { courses: [], caregivers: [] };
   const r = raw as Record<string, unknown>;
@@ -98,7 +111,7 @@ export function sanitizeCourseData(raw: unknown, now = Date.now()): CourseData {
     .slice(0, MAX_COURSES * 2)
     .map((c) => sanitizeCourse(c, now))
     .filter((c): c is Course => c !== null)
-    .filter((c) => c.startAt + (c.days + 1) * DAY > now - KEEP_FINISHED_MS)
+    .filter((c) => lastActivity(c) + (c.mode === 'asNeeded' ? 0 : (c.days + 1) * DAY) > now - KEEP_FINISHED_MS)
     .sort((a, b) => b.startAt - a.startAt)
     .slice(0, MAX_COURSES);
   const caregivers = Array.from(
@@ -107,10 +120,81 @@ export function sanitizeCourseData(raw: unknown, now = Date.now()): CourseData {
   return { courses, caregivers };
 }
 
+const LEGACY_MEDLOG_KEY = 'lulla.medlog.v2';
+const LEGACY_INTERVAL_HOURS: Record<string, { name: string; hours: number }> = {
+  acetaminophen: { name: 'Acetaminophen', hours: 4 },
+  ibuprofen: { name: 'Ibuprofen', hours: 6 },
+};
+
+// The removed dose calculator kept a 7-day log of doses. Move those records into the new
+// medicine log (as-needed items) so nothing the parent logged is lost.
+async function migrateLegacyMedLog(existing: CourseData, now: number): Promise<CourseData | null> {
+  const raw = await secureGet(LEGACY_MEDLOG_KEY);
+  if (raw === null) return null;
+  let entries: unknown = [];
+  try {
+    entries = JSON.parse(raw);
+  } catch {
+    entries = [];
+  }
+  const grouped = new Map<string, DoseLog[]>();
+  if (Array.isArray(entries)) {
+    for (const item of entries.slice(0, 120)) {
+      if (typeof item !== 'object' || item === null) continue;
+      const e = item as Record<string, unknown>;
+      if (typeof e.med !== 'string' || !(e.med in LEGACY_INTERVAL_HOURS) || !isNum(e.at) || e.at > now + 60_000) continue;
+      const list = grouped.get(e.med) ?? [];
+      list.push({
+        id: `legacy-${e.at}-${list.length}`,
+        slot: null,
+        at: e.at,
+        by: '',
+        early: false,
+        vomited: false,
+      });
+      grouped.set(e.med, list);
+    }
+  }
+  const migrated: Course[] = [];
+  for (const [med, log] of grouped) {
+    const info = LEGACY_INTERVAL_HOURS[med];
+    const first = Math.min(...log.map((l) => l.at));
+    migrated.push({
+      id: `legacy-${med}`,
+      mode: 'asNeeded',
+      maxPer24: null,
+      medName: info.name,
+      doseText: 'See the label (moved from the old dose log)',
+      schedule: { kind: 'interval', hours: info.hours },
+      startAt: first,
+      days: 1,
+      remind: false,
+      createdAt: now,
+      log,
+      skipped: [],
+      notes: [
+        {
+          id: `legacy-note-${med}`,
+          at: now,
+          text: 'Moved from the old dose log. Only the times were kept. Check the waiting time and dose against your medicine label.',
+        },
+      ],
+      stoppedAt: null,
+    });
+  }
+  const merged = sanitizeCourseData({ ...existing, courses: [...migrated, ...existing.courses] }, now);
+  await secureSet(COURSES_KEY, JSON.stringify(merged));
+  await secureDelete(LEGACY_MEDLOG_KEY);
+  return merged;
+}
+
 export async function loadCourses(): Promise<CourseData> {
   try {
     const raw = await secureGet(COURSES_KEY);
-    return raw ? sanitizeCourseData(JSON.parse(raw)) : { courses: [], caregivers: [] };
+    const current = raw ? sanitizeCourseData(JSON.parse(raw)) : { courses: [], caregivers: [] };
+    const migrated = await migrateLegacyMedLog(current, Date.now()).catch(() => null);
+    AsyncStorage.removeItem('lulla.medLog.v1').catch(() => {});
+    return migrated ?? current;
   } catch {
     return { courses: [], caregivers: [] };
   }
@@ -122,4 +206,5 @@ export async function saveCourses(data: CourseData): Promise<void> {
 
 export async function wipeCourses(): Promise<void> {
   await secureDelete(COURSES_KEY);
+  await secureDelete(LEGACY_MEDLOG_KEY);
 }

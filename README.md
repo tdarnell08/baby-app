@@ -33,19 +33,13 @@ An Expo (React Native) app for baby sleep, first words, first foods, and early m
 - Plus: monthly recap (milestones, first words, photos, average sleep) and keepsake PDFs for a month or a year, laid out and generated on the device with `expo-print`
 - Photos are resized with `expo-image-manipulator` and kept only in the app's private folder
 
-**Antibiotic course tracker** (`/antibiotics`, `/course-new`, `/course`), free
-- A tracker, not a calculator: the parent types the medicine, dose, and schedule exactly as on the pharmacy label. Lulla never computes, suggests, or validates a dose
-- Schedule by clock times or "every N hours", start date and time, and course length; countdown (day X of N, doses left, finish time)
-- Local dose reminders (generic text, so the medicine name never appears on the lock screen) and a follow-up if a dose is not logged
-- Log each dose with who gave it, a possible double-dose warning when it is too soon compared with the entered schedule, missed-dose flags, "vomited after dose" with a call-your-pharmacist notice, side-effect notes
-- Share a text summary or save a PDF for the doctor
-
-**Medicine doses**
-- Weight-based acetaminophen and ibuprofen doses (mL and mg) from the AAP's published dosing tables, with every band checked in code against the 10 to 15 mg/kg and 5 to 10 mg/kg per-dose ranges
-- Age limits enforced: no ibuprofen under 6 months, and a "call your pediatrician first" message for acetaminophen under 12 weeks
-- A dose log that shows the last dose, the earliest next dose, and the 24-hour dose count, and warns when a dose would be too soon or over the daily limit
-- "Call first" red flags, safe-use rules, what not to give, vitamin D and iron notes, sources, and a not-medical-advice disclaimer
-- US product strengths only (160 mg/5 mL acetaminophen, 100 mg/5 mL ibuprofen); the page warns that other countries and infant ibuprofen drops differ
+**Sick Day / When They're Sick** (`/sick` and the screens below), free for everyone
+- **Medicine log** (`/sick-meds`, `/course-new`, `/course`): antibiotic courses plus as-needed medicines (fever reducers and similar). A log, not a calculator: the parent types the medicine, dose, waiting time, and any daily limit exactly as printed on the label. Lulla shows "last given" and "next allowed at" (last dose plus the interval the parent typed), warns before a double dose (too soon, or over the typed daily limit), records who gave each dose, and can send a local "next dose allowed" reminder. Courses keep their schedule, countdown, missed-dose flags, and "vomited after dose" notice. Existing antibiotic courses carry over automatically
+- **Package dosing charts** (`/sick-charts`, `/chart-new`): replaces the old calculator. Parents save a photo of the chart printed on the box and/or type its table. No weight-based calculation, no suggested amounts, no built-in dose data. A "confirm with your pediatrician or pharmacist" note is shown on every chart
+- **Symptom log** (`/sick-symptoms`): one log per illness with temperature (F or C, with method), fluids, wet diapers, sleep notes, behavior chips, and notes on a timeline. A fever notice follows AAP thresholds for the baby's age (any fever of 100.4 F / 38 C under 3 months, 101 F at 3 to 6 months, 103 F from 6 months, above 104 F, or 24 hours (under 2) / 72 hours (2 and up))
+- **When to call the doctor** (`/sick-doctor`): a "call 911" tier and "call your pediatrician now" lists by age band, each item tagged with its source (AAP, CDC, NHS) and linked, with a not-a-diagnosis disclaimer
+- **Comfort tips** (`/sick-comfort`): fluids, saline and suction, cool-mist humidifier, rest, medicine safety, filtered by age and cited
+- **Doctor summary** (`/sick-summary`): one tap to share the current illness as text or a PDF (temperatures, medicines given from the log, fluids, diapers, sleep, notes)
 
 **Sleep sounds** (20 seamless loops, generated in code, royalty free)
 - Steady noise: white, pink, deep rumble
@@ -80,7 +74,7 @@ Lulla is not affiliated with any TV show and does not imitate anyone's voice. Fi
 
 ## Free and Plus tiers
 
-Safety and health tracking are always free (milestones, first foods and choking safety, the antibiotic course tracker with reminders, medicine safety, privacy and security controls). Lulla Plus is sold around sleep, memories, and family keepsakes, plus extra content.
+Safety and health tracking are always free (milestones, first foods and choking safety, the whole Sick Day section with its dose reminders, privacy and security controls). Lulla Plus is sold around sleep, memories, and family keepsakes, plus extra content.
 
 | | Free | Lulla Plus |
 | --- | --- | --- |
@@ -96,10 +90,10 @@ Pricing (set in App Store Connect; the app shows store prices): Yearly $29.99 wi
 ## Privacy and security
 
 - No accounts, ads, analytics, or tracking. Baby data stays on the device. Reminders are local notifications, and PDFs are generated on the phone.
-- Profile, dose log, sleep log, medicine courses, and memory text are stored in the iOS Keychain / Android Keystore (`expo-secure-store`, device-only), with validation on every read.
+- Profile, sleep log, medicine log, symptom log, package chart text, and memory text are stored in the iOS Keychain / Android Keystore (`expo-secure-store`, device-only), with validation on every read.
 - Optional app lock with Face ID / passcode; the app is covered in the app switcher.
 - Settings has data export, delete-all, and the privacy policy, terms, and medical disclaimer.
-- The medicine dosing page is controlled by `EXPO_PUBLIC_ENABLE_MEDICINE_DOSES` and is off in the production EAS profile (App Store Guideline 1.4.1).
+- There is no dose calculator. The old weight-based page, its data tables, and the weight field were removed, so nothing is gated by a flag (App Store Guideline 1.4.1, see docs/APP_STORE.md). The one-time migration turns any old dose-log entries into as-needed medicine log items (times only) and drops the stored weight.
 
 See [docs/APP_STORE.md](docs/APP_STORE.md) for the App Store checklist, privacy label answers, purchase setup, and known risks. Copy `.env.example` to `.env.local` to configure.
 
@@ -118,12 +112,13 @@ To share a browser preview from a remote machine: `npx expo export --platform we
 
 ## Project layout
 
-- `src/app/`: screens (Expo Router): home, plan, profile, milestones, medicine, sleep, coach, memories, memory-new, recap, antibiotics, course-new, course, words, foods, steps, paywall, settings, legal
+- `src/app/`: screens (Expo Router): home, plan, profile, milestones, sleep, coach, memories, memory-new, recap, sick, sick-meds, sick-symptoms, sick-doctor, sick-comfort, sick-charts, chart-new, sick-summary, course-new, course, words, foods, steps, paywall, settings, legal
 - `src/providers/`: purchases/entitlement and app lock
 - `src/lib/`: secure storage, profile/sleep/course/memory stores, `sleepCoach.ts` (wake windows and prediction), `courseLogic.ts` (schedule, missed and double-dose checks), `reminders.ts` (local notifications), `keepsake.ts` and `pdf.ts`, `media.ts`, purchase engine, data export/delete
 - `src/data/pricing.ts` and `src/data/legal.ts`: tiers, pricing, and legal text
-- `src/data/medications.ts`: dosing tables, safety rules, and the dose calculation
-- `src/hooks/useMedLog.ts`: the on-device dose log
+- `src/data/sickGuide.ts`: cited red flags by age, comfort tips, and safe-use text for Sick Day
+- `src/lib/illnessLogic.ts`, `illnessStore.ts`, `illnessExport.ts`: symptom log, fever notices by age, and the doctor summary (text and PDF)
+- `src/lib/chartStore.ts`: package dosing charts (photo and typed table)
 - `src/data/milestones.ts`: milestone checklist data and helpers
 - `src/data/plan.ts`: the daily plan generator (pure function), bonding ideas, CDC-style milestones
 - `src/hooks/useBabyProfile.ts`: saved baby profile and today's plan

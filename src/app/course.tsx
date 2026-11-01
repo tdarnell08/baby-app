@@ -4,10 +4,11 @@ import { Platform, Share, Switch, Text, View } from 'react-native';
 import { Body, Btn, Chip, Field, Notice, Panel, ProgressBar, Screen, Section, Title, uiStyles } from '@/components/ui';
 import { colors } from '@/constants/theme';
 import { courseDisclaimer, courseRules, courseSidePrompts } from '@/data/courses';
+import { sickDisclaimer } from '@/data/sickGuide';
 import { useBabyProfile } from '@/hooks/useBabyProfile';
 import { useCourses } from '@/hooks/useCourses';
 import { courseHtml } from '@/lib/courseExport';
-import { courseState, courseSummary, doseWarnings, scheduleLabel } from '@/lib/courseLogic';
+import { asNeededLabel, courseState, courseSummary, doseWarnings, scheduleLabel } from '@/lib/courseLogic';
 import { exportHtmlAsPdf } from '@/lib/pdf';
 import { nowMs, useNow } from '@/lib/time';
 import { ensureNotificationPermission, remindersSupported } from '@/lib/reminders';
@@ -27,7 +28,7 @@ function left(ms: number) {
 export default function CourseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { profile } = useBabyProfile();
+  const { profile, ageMonths } = useBabyProfile();
   const hook = useCourses();
   const course = hook.courses.find((c) => c.id === id);
   const now = useNow();
@@ -44,14 +45,15 @@ export default function CourseScreen() {
 
   if (!course) {
     return (
-      <Screen gradient={['#1E2F33', '#26474A', '#2F5E55']} back="← Courses" backTo="/antibiotics">
-        <Title>{hook.ready ? 'Course not found' : 'Loading…'}</Title>
-        {hook.ready ? <Btn label="Back to courses" onPress={() => router.replace('/antibiotics')} /> : null}
+      <Screen gradient={['#1E2F33', '#26474A', '#2F5E55']} back="← Medicine log" backTo="/sick-meds">
+        <Title>{hook.ready ? 'Medicine not found' : 'Loading…'}</Title>
+        {hook.ready ? <Btn label="Back to medicine log" onPress={() => router.replace('/sick-meds')} /> : null}
       </Screen>
     );
   }
 
   const state = courseState(course, now);
+  const asNeeded = course.mode === 'asNeeded';
   const warnings = logging ? doseWarnings(course, now) : [];
   const history = [...course.log].sort((a, b) => b.at - a.at);
   const remaining = state.total - state.given - state.skipped;
@@ -98,12 +100,20 @@ export default function CourseScreen() {
   };
 
   return (
-    <Screen gradient={['#1E2F33', '#26474A', '#2F5E55']} back="← Courses" backTo="/antibiotics">
+    <Screen gradient={['#1E2F33', '#26474A', '#2F5E55']} back="← Medicine log" backTo="/sick-meds">
       <Title sub={`As written on the label: ${course.doseText}`}>{course.medName}</Title>
-      <Body tone="muted">{scheduleLabel(course.schedule)}</Body>
+      <Body tone="muted">{asNeeded ? asNeededLabel(course) : scheduleLabel(course.schedule)}</Body>
 
-      <Notice tone="danger" title="Missed a dose or vomited?">
-        Call your pharmacist or pediatrician before giving another dose. Follow the label and their advice.
+      {asNeeded && ageMonths < 3 ? (
+        <Notice tone="danger" title="Under 3 months">
+          Call your pediatrician before giving any medicine to a baby this young, including for fever.
+        </Notice>
+      ) : null}
+
+      <Notice tone="danger" title={asNeeded ? 'Check the label every time' : 'Missed a dose or vomited?'}>
+        {asNeeded
+          ? 'Lulla only compares your log with the waiting time you typed from the label. It does not know your baby’s weight, age, or other medicines. Confirm with your pharmacist or pediatrician if you are unsure.'
+          : 'Call your pharmacist or pediatrician before giving another dose. Follow the label and their advice.'}
       </Notice>
 
       {vomitAlert ? (
@@ -112,6 +122,26 @@ export default function CourseScreen() {
         </Notice>
       ) : null}
 
+      {asNeeded ? (
+        <Panel>
+          <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 13, color: colors.mist }}>LAST GIVEN</Text>
+          <Text style={{ fontFamily: 'Fraunces_700Bold', fontSize: 24, color: colors.foam }}>
+            {state.lastGivenAt ? when(state.lastGivenAt) : 'Nothing logged yet'}
+          </Text>
+          {state.lastGivenAt ? <Body tone="muted">{left(now - state.lastGivenAt)} ago · {history[0]?.by || 'caregiver not noted'}</Body> : null}
+          <Text style={{ fontFamily: 'Nunito_700Bold', fontSize: 13, color: colors.mist, marginTop: 6 }}>NEXT ALLOWED AT</Text>
+          <Text style={{ fontFamily: 'Fraunces_700Bold', fontSize: 24, color: state.allowedNow ? colors.butter : colors.blush }}>
+            {state.nextAllowedAt === null ? 'Any time, per the label' : state.allowedNow ? 'Now' : when(state.nextAllowedAt)}
+          </Text>
+          <Body tone="muted">
+            {state.nextAllowedAt !== null && !state.allowedNow
+              ? `In ${left(state.nextAllowedAt - now)}, based on the ${course.schedule.kind === 'interval' ? course.schedule.hours : ''} hour wait you entered.`
+              : 'Based on the waiting time you entered from the label.'}
+            {course.maxPer24 ? ` ${state.count24} of ${course.maxPer24} doses logged in the last 24 hours.` : ` ${state.count24} dose${state.count24 === 1 ? '' : 's'} logged in the last 24 hours.`}
+          </Body>
+          {state.stopped ? <Body tone="warn">You stopped tracking this medicine.</Body> : null}
+        </Panel>
+      ) : (
       <Panel>
         <View style={uiStyles.between}>
           <Text style={{ fontFamily: 'Fraunces_700Bold', fontSize: 26, color: colors.butter }}>
@@ -139,16 +169,21 @@ export default function CourseScreen() {
           </>
         )}
       </Panel>
+      )}
 
       {!state.finished ? (
         <Panel>
-          <Text style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: 19, color: colors.foam }}>
-            {state.nextAt ? (state.due ? 'Dose due now' : 'Next dose') : 'No dose scheduled right now'}
-          </Text>
-          {state.nextAt ? <Body>{when(state.nextAt)}{state.due ? '' : ` · in ${left(state.nextAt - now)}`}</Body> : null}
+          {!asNeeded ? (
+            <>
+              <Text style={{ fontFamily: 'Fraunces_600SemiBold', fontSize: 19, color: colors.foam }}>
+                {state.nextAt ? (state.due ? 'Dose due now' : 'Next dose') : 'No dose scheduled right now'}
+              </Text>
+              {state.nextAt ? <Body>{when(state.nextAt)}{state.due ? '' : ` · in ${left(state.nextAt - now)}`}</Body> : null}
+            </>
+          ) : null}
 
           {!logging ? (
-            <Btn label="I gave a dose" onPress={() => setLogging(true)} />
+            <Btn label={asNeeded ? 'I gave this medicine' : 'I gave a dose'} onPress={() => setLogging(true)} />
           ) : (
             <View style={{ gap: 10 }}>
               {warnings.map((w) => (
@@ -195,7 +230,7 @@ export default function CourseScreen() {
         </Panel>
       ) : null}
 
-      {state.missed.length > 0 ? (
+      {!asNeeded && state.missed.length > 0 ? (
         <>
           <Section>Missed doses</Section>
           <Panel>
@@ -224,7 +259,7 @@ export default function CourseScreen() {
               {when(l.at)} · {l.by || 'not noted'}
             </Text>
             <Body tone="muted">
-              {[l.slot === null ? 'Unscheduled dose' : '', l.early ? 'Earlier than scheduled' : '', l.vomited ? 'Vomited after dose' : ''].filter(Boolean).join(' · ') || 'On schedule'}
+              {[l.slot === null && !asNeeded ? 'Unscheduled dose' : '', l.early ? 'Earlier than scheduled' : '', l.vomited ? 'Vomited after dose' : ''].filter(Boolean).join(' · ') || 'On schedule'}
             </Body>
             <View style={uiStyles.row}>
               {!l.vomited ? <Btn label="Vomited after" kind="ghost" small onPress={() => { hook.markVomited(course.id, l.id); setVomitAlert(true); }} /> : null}
@@ -257,10 +292,10 @@ export default function CourseScreen() {
       <Panel>
         <View style={uiStyles.row}>
           <View style={uiStyles.flex}>
-            <Body>Remind me at each dose time{remindersSupported ? '' : ' (iPhone app only)'}</Body>
+            <Body>{asNeeded ? 'Remind me when the next dose is allowed' : 'Remind me at each dose time'}{remindersSupported ? '' : ' (iPhone app only)'}</Body>
           </View>
           <Switch
-            accessibilityLabel="Remind me at each dose time"
+            accessibilityLabel="Reminders"
             value={course.remind}
             onValueChange={toggleRemind}
             trackColor={{ true: colors.butter, false: 'rgba(255,255,255,0.2)' }}
@@ -284,32 +319,32 @@ export default function CourseScreen() {
       <Panel>
         {!state.finished ? (
           !confirmStop ? (
-            <Btn label="My doctor told me to stop early" kind="secondary" onPress={() => setConfirmStop(true)} />
+            <Btn label={asNeeded ? 'I’m done tracking this medicine' : 'My doctor told me to stop early'} kind="secondary" onPress={() => setConfirmStop(true)} />
           ) : (
             <View style={{ gap: 8 }}>
-              <Body>Mark this course as stopped? Only do this if your doctor or pharmacist told you to.</Body>
+              <Body>{asNeeded ? 'Move this medicine to your finished list? Your log stays saved.' : 'Mark this course as stopped? Only do this if your doctor or pharmacist told you to.'}</Body>
               <View style={uiStyles.row}>
                 <Btn label="Keep going" kind="secondary" onPress={() => setConfirmStop(false)} style={uiStyles.flex} />
-                <Btn label="Mark stopped" onPress={() => { hook.stopCourse(course.id); setConfirmStop(false); }} style={uiStyles.flex} />
+                 <Btn label={asNeeded ? 'Move to finished' : 'Mark stopped'} onPress={() => { hook.stopCourse(course.id); setConfirmStop(false); }} style={uiStyles.flex} />
               </View>
             </View>
           )
         ) : null}
         {!confirmDelete ? (
-          <Btn label="Delete this course" kind="ghost" onPress={() => setConfirmDelete(true)} />
+          <Btn label={asNeeded ? 'Delete this medicine' : 'Delete this course'} kind="ghost" onPress={() => setConfirmDelete(true)} />
         ) : (
           <View style={{ gap: 8 }}>
             <Body tone="warn">Delete this course and its log from your phone? It can’t be undone.</Body>
             <View style={uiStyles.row}>
               <Btn label="Cancel" kind="secondary" onPress={() => setConfirmDelete(false)} style={uiStyles.flex} />
-              <Btn label="Delete" kind="danger" onPress={() => { hook.remove(course.id); router.replace('/antibiotics'); }} style={uiStyles.flex} />
+              <Btn label="Delete" kind="danger" onPress={() => { hook.remove(course.id); router.replace('/sick-meds'); }} style={uiStyles.flex} />
             </View>
           </View>
         )}
       </Panel>
 
       <Notice tone="info" title="Important">
-        {courseDisclaimer}
+        {asNeeded ? sickDisclaimer : courseDisclaimer}
       </Notice>
       <Panel>
         {courseRules.map((r) => (

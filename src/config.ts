@@ -1,5 +1,4 @@
 export const config = {
-  medicineDoses: process.env.EXPO_PUBLIC_ENABLE_MEDICINE_DOSES !== 'false',
   mockPurchases: process.env.EXPO_PUBLIC_ENABLE_MOCK_PURCHASES === 'true',
   revenueCatIosKey: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY ?? '',
   supportEmail: process.env.EXPO_PUBLIC_SUPPORT_EMAIL ?? '',
