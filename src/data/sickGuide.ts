@@ -61,6 +61,66 @@ export const sources: Record<string, Source> = {
     title: 'Should You Give Kids Medicine for Coughs and Colds?',
     url: 'https://www.fda.gov/consumers/consumer-updates/should-you-give-kids-medicine-coughs-and-colds',
   },
+  aapSafeSleep: {
+    id: 'aapSafeSleep',
+    org: 'American Academy of Pediatrics (HealthyChildren.org)',
+    title: 'How to Keep Your Sleeping Baby Safe: AAP Policy Explained',
+    url: 'https://www.healthychildren.org/English/ages-stages/baby/sleep/Pages/a-parents-guide-to-safe-sleep.aspx',
+  },
+  aapSids: {
+    id: 'aapSids',
+    org: 'American Academy of Pediatrics (HealthyChildren.org)',
+    title: 'Safe Sleep: 9 Ways to Reduce a Baby’s Risk of SIDS and Suffocation',
+    url: 'https://www.healthychildren.org/English/ages-stages/baby/sleep/Pages/preventing-sids.aspx',
+  },
+  aapBackSleep: {
+    id: 'aapBackSleep',
+    org: 'American Academy of Pediatrics (HealthyChildren.org)',
+    title: 'Back to Sleep, Tummy to Play',
+    url: 'https://www.healthychildren.org/english/ages-stages/baby/sleep/pages/back-to-sleep-tummy-to-play.aspx',
+  },
+  aap2022: {
+    id: 'aap2022',
+    org: 'American Academy of Pediatrics (Pediatrics)',
+    title: 'Sleep-Related Infant Deaths: Updated 2022 Recommendations',
+    url: 'https://publications.aap.org/pediatrics/article/150/1/e2022057990/188304/Sleep-Related-Infant-Deaths-Updated-2022',
+  },
+  aapGettingToSleep: {
+    id: 'aapGettingToSleep',
+    org: 'American Academy of Pediatrics (HealthyChildren.org)',
+    title: 'Getting Your Baby to Sleep',
+    url: 'https://www.healthychildren.org/English/ages-stages/baby/sleep/Pages/getting-your-baby-to-sleep.aspx',
+  },
+  aapToddlerSleep: {
+    id: 'aapToddlerSleep',
+    org: 'American Academy of Pediatrics (HealthyChildren.org)',
+    title: 'Toddler Won’t Go to Sleep? 7 Tips to Help End Bedtime Battles',
+    url: 'https://www.healthychildren.org/English/healthy-living/sleep/Pages/bedtime-trouble.aspx',
+  },
+  aapSleepHabits: {
+    id: 'aapSleepHabits',
+    org: 'American Academy of Pediatrics (HealthyChildren.org)',
+    title: 'Healthy Sleep Habits: How Many Hours Does Your Child Need?',
+    url: 'https://www.healthychildren.org/English/healthy-living/sleep/Pages/Healthy-Sleep-Habits-How-Many-Hours-Does-Your-Child-Need.aspx',
+  },
+  aapBrushBookBed: {
+    id: 'aapBrushBookBed',
+    org: 'American Academy of Pediatrics (HealthyChildren.org)',
+    title: 'Brush, Book, Bed: How to Structure Your Child’s Nighttime Routine',
+    url: 'https://www.healthychildren.org/English/healthy-living/oral-health/Pages/Brush-Book-Bed.aspx',
+  },
+  aapApnea: {
+    id: 'aapApnea',
+    org: 'American Academy of Pediatrics (HealthyChildren.org)',
+    title: 'Sleep Apnea in Children: Detection and Treatment',
+    url: 'https://www.healthychildren.org/English/ages-stages/baby/sleep/Pages/Sleep-Apnea-Detection.aspx',
+  },
+  chopSleep: {
+    id: 'chopSleep',
+    org: 'Children’s Hospital of Philadelphia',
+    title: 'Healthy Sleep Habits',
+    url: 'https://www.chop.edu/primary-care/healthy-sleep-habits',
+  },
 };
 
 export type AgeBand = 'under3' | 'm3to6' | 'm6to12' | 'over12';

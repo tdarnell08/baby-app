@@ -33,6 +33,8 @@ export const privacyPolicy: LegalDoc = {
         'Baby profile: an optional name, birth date or age, interests, and your preferred play time. Lulla does not ask for or store your baby’s weight.',
         'Milestones: the milestones you check off and the date you checked them.',
         'Sleep log: the start and end times of the naps and night sleep you log, kept for up to 90 days, and your sleep reminder choices.',
+        'Kid Mode settings: the age range you choose, whether sound is on, and whether you finished first-time setup. Nothing a child does in Kid Mode is stored.',
+        'Sleep help: the tips you add to tonight’s plan (cleared each night), the bedtime routine steps you build, and the night wakes you log with their times and a one-tap type, kept for up to 60 days.',
         'Sick Day medicine log: the medicine name, dose, waiting time, and schedule exactly as you type them from the label, your log of doses given with the names you enter for who gave each dose, and notes. This includes antibiotic courses and as-needed medicines such as fever reducers. Lulla never calculates or suggests a dose.',
         'Sick Day symptom log: illness episodes you start, with the temperatures (and how they were taken), fluids, wet diapers, sleep notes, behavior, and notes you enter, as a timeline.',
         'Package dosing charts: the product name, ingredient, any table you type from the package, and any photo of the package chart you choose to save. Lulla does not read the photo or interpret the chart.',
@@ -44,7 +46,7 @@ export const privacyPolicy: LegalDoc = {
     {
       heading: 'How it is protected',
       body: [
-        'Your baby profile, milestones, sleep log, medicine log, symptom log, package chart text, and memory text are kept in the secure storage built into your phone (the iOS Keychain, or the Android Keystore). On iPhone these items are set to this-device-only, so they are not copied to iCloud backups or to a new device.',
+        'Your baby profile, milestones, sleep log, sleep help data, medicine log, symptom log, package chart text, and memory text are kept in the secure storage built into your phone (the iOS Keychain, or the Android Keystore). On iPhone these items are set to this-device-only, so they are not copied to iCloud backups or to a new device.',
         'You can turn on an app lock in Settings. Lulla then asks for Face ID, Touch ID, or your device passcode when you open it, and hides its screen in the app switcher. Lulla never receives your biometric data; your phone handles it.',
         'Photos of memories and package charts, memory voice clips, and First words voice recordings are stored as files in the app’s private storage, which your phone protects with device encryption and which may be included in your encrypted device backups.',
         'Reminders are local notifications created on your phone. Medicine reminders say only “Medicine reminder,” so the medicine name never appears on your lock screen. Reminders are not sent through any server.',
@@ -63,13 +65,15 @@ export const privacyPolicy: LegalDoc = {
       heading: 'Children’s privacy',
       body: [
         'Lulla is designed for parents and caregivers, not for children. Information about your baby is entered by you and stays on your device. We do not knowingly collect personal information from children.',
+        'Kid Mode is a section of simple games a parent can hand to a young child. Kid Mode collects no information from children: no names, photos, voice, location, or identifiers, and it has no ads, no links to outside sites, no purchase screens, no analytics, and no accounts. It does not use the camera, microphone, or internet connection, and everything it plays is stored in the app. What your child does in a game, including anything they draw, is not saved. The only Kid Mode information kept is the age range, sound setting, and a “set up” flag that the parent chooses, stored on the device.',
+        'Leaving Kid Mode, changing its settings, or buying Lulla Plus requires a parent check (holding a corner for 3 seconds, then answering an adult math question). Notifications are silenced while Kid Mode is open.',
       ],
     },
     {
       heading: 'Your choices',
       body: [
         'You can change or remove anything in the app at any time.',
-        'In Settings, “Export my data” gives you a copy of what Lulla stores, and “Delete all my data” erases the profile, milestones, sleep log, medicine log, symptom log, package dosing charts, memories with their photos and voice clips, voice recordings, scheduled reminders, and app lock setting from your device.',
+        'In Settings, “Export my data” gives you a copy of what Lulla stores, and “Delete all my data” erases the profile, milestones, sleep log, sleep help data, Kid Mode settings, medicine log, symptom log, package dosing charts, memories with their photos and voice clips, voice recordings, scheduled reminders, and app lock setting from your device.',
         'On iPhone, Keychain items can remain after an app is deleted. For a complete removal, use “Delete all my data” before you uninstall Lulla.',
         'Lulla Plus subscriptions can be managed or canceled in your Apple ID account settings.',
       ],
@@ -171,6 +175,23 @@ export const medicalDisclaimer: LegalDoc = {
       body: [
         'Wake windows and nap counts are common ranges, not rules, and predictions are estimates from the sleeps you log. Babies vary a lot. Total sleep ranges come from the American Academy of Sleep Medicine and the National Sleep Foundation.',
         'Follow safe sleep guidance: back to sleep, on a firm, flat surface, with nothing else in the crib. Talk to your pediatrician if you are worried about your baby’s sleep or breathing.',
+      ],
+    },
+    {
+      heading: 'Sleep help',
+      body: [
+        'Sleep help shares general parenting and safe-sleep guidance from public sources, including the American Academy of Pediatrics (AAP) and Children’s Hospital of Philadelphia. It does not diagnose a sleep problem or any condition, and it cannot tell you why your child is not sleeping. Every item shows its source, and some items are general ideas without one.',
+        'Follow safe sleep guidance from the AAP: back to sleep for every sleep including naps, a firm, flat surface with a tight fitted sheet and nothing else in the crib, and sharing a room (not a bed) for at least the first 6 months. Never fall asleep with your baby on a couch or armchair.',
+        'The “Talk to your pediatrician if…” list, taken from the AAP, includes frequent snoring, noisy or labored breathing during sleep, pauses in breathing, gasping or choking, unusual daytime sleepiness, and trouble paying attention or behavior problems. Call 911 if breathing stops for more than 20 seconds, skin turns pale, blue, or gray, there is a change in muscle tone, or there is a fever or other signs of illness along with these.',
+        'The wake window helper uses common age ranges, not rules. White noise and shush sounds may help some babies settle, but the research is limited. Keep sound low and the phone across the room, never in the crib. 3 a.m. mode stops playing on its own after 30 minutes.',
+        'Night wake patterns are a record of what you logged. They are not a diagnosis. Bring them to your pediatrician if you are worried.',
+      ],
+    },
+    {
+      heading: 'Kid Mode',
+      body: [
+        'Kid Mode games are simple learning play for ages 1 to 5. They are not therapy, do not treat or diagnose anything, and are not a substitute for a caregiver. Stay with your child, watch for small parts and cords near the phone, and keep screen time in balance. The American Academy of Pediatrics suggests avoiding screens for children under 18 months other than video chatting, and keeping screen time for ages 2 to 5 to about one hour a day of high-quality content.',
+        'The breathing buddy is a calming play activity, not a treatment for anxiety, tantrums, or any condition. In an emergency, call 911 first. Guided Access and screen pinning are settings built into your phone, and their steps can vary.',
       ],
     },
     {

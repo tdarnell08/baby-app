@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { computeAge } from '@/lib/age';
 import { courseState, MIN } from '@/lib/courseLogic';
 import { loadCourses } from '@/lib/courseStore';
+import { isKidModeActive } from '@/lib/kidMode';
 import { loadProfile } from '@/lib/profileStore';
 import { clock, predictNext } from '@/lib/sleepCoach';
 import { loadSleep, loadSleepPrefs } from '@/lib/sleepStore';
@@ -17,9 +18,9 @@ let chain: Promise<void> = Promise.resolve();
 if (!isWeb) {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldPlaySound: true,
+      shouldPlaySound: !isKidModeActive(),
       shouldSetBadge: false,
-      shouldShowBanner: true,
+      shouldShowBanner: !isKidModeActive(),
       shouldShowList: true,
     }),
   });

@@ -24,6 +24,19 @@ Lulla shares general information for parents and caregivers. It is not a substit
 - Wake windows and nap counts are common ranges, not rules, and predictions are estimates from the sleeps you log. Babies vary a lot. Total sleep ranges come from the American Academy of Sleep Medicine and the National Sleep Foundation.
 - Follow safe sleep guidance: back to sleep, on a firm, flat surface, with nothing else in the crib. Talk to your pediatrician if you are worried about your baby’s sleep or breathing.
 
+## Sleep help
+
+- Sleep help shares general parenting and safe-sleep guidance from public sources, including the American Academy of Pediatrics (AAP) and Children’s Hospital of Philadelphia. It does not diagnose a sleep problem or any condition, and it cannot tell you why your child is not sleeping. Every item shows its source, and some items are general ideas without one.
+- Follow safe sleep guidance from the AAP: back to sleep for every sleep including naps, a firm, flat surface with a tight fitted sheet and nothing else in the crib, and sharing a room (not a bed) for at least the first 6 months. Never fall asleep with your baby on a couch or armchair.
+- The “Talk to your pediatrician if…” list, taken from the AAP, includes frequent snoring, noisy or labored breathing during sleep, pauses in breathing, gasping or choking, unusual daytime sleepiness, and trouble paying attention or behavior problems. Call 911 if breathing stops for more than 20 seconds, skin turns pale, blue, or gray, there is a change in muscle tone, or there is a fever or other signs of illness along with these.
+- The wake window helper uses common age ranges, not rules. White noise and shush sounds may help some babies settle, but the research is limited. Keep sound low and the phone across the room, never in the crib. 3 a.m. mode stops playing on its own after 30 minutes.
+- Night wake patterns are a record of what you logged. They are not a diagnosis. Bring them to your pediatrician if you are worried.
+
+## Kid Mode
+
+- Kid Mode games are simple learning play for ages 1 to 5. They are not therapy, do not treat or diagnose anything, and are not a substitute for a caregiver. Stay with your child, watch for small parts and cords near the phone, and keep screen time in balance. The American Academy of Pediatrics suggests avoiding screens for children under 18 months other than video chatting, and keeping screen time for ages 2 to 5 to about one hour a day of high-quality content.
+- The breathing buddy is a calming play activity, not a treatment for anxiety, tantrums, or any condition. In an emergency, call 911 first. Guided Access and screen pinning are settings built into your phone, and their steps can vary.
+
 ## Development, food, and movement
 
 - Milestones are common signs, not deadlines or a diagnosis. Babies develop at their own pace. If you have a concern, raise it with your pediatrician.

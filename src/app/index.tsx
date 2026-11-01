@@ -18,6 +18,18 @@ const actions = [
     primary: true,
   },
   {
+    href: '/sleep-help' as const,
+    label: 'Sleep help',
+    hint: 'Won’t sleep or waking at night? Tap through to what might help.',
+    primary: false,
+  },
+  {
+    href: '/kid' as const,
+    label: 'Kid Mode',
+    hint: 'Calm games to hand to your toddler. No ads, no data.',
+    primary: false,
+  },
+  {
     href: '/words' as const,
     label: 'First words',
     hint: 'Parentese lessons with warm voice clips',

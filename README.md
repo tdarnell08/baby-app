@@ -27,6 +27,24 @@ An Expo (React Native) app for baby sleep, first words, first foods, and early m
 - Today's totals and a 24-hour timeline; typical awake time, naps, and total sleep for the baby's age (AASM and National Sleep Foundation ranges)
 - Plus: next sleep window predicted from the median of recent awake gaps (falls back to the age range until there are 3 samples), bedtime from recent nights, a local notification 5 to 30 minutes before the window opens, a 7-day stacked chart (naps and night) and weekly averages
 
+**Sleep help** (`/sleep-help` and the screens below), basics free
+- **Troubleshooter** (`/sleep-fix`): a tap-through. Step 1 is a quick "Rule out" check (hungry, too hot or cold, wet diaper, teething or sick with a link to Sick Day, nap timing). Then "What's happening?" (won't fall asleep, wakes often, wakes too early, short naps, fights bedtime, sleep regression), then an age band (0-3 m, 4-6 m, 7-12 m, 1-2 y, 2 y+, prefilled from the baby profile). It shows 3 to 5 short tip cards that fit both answers, each with a source tag (AAP, CHOP, or none when it is a general idea) and an "I'll try this" button that adds it to **tonight's plan**, a checklist on the Sleep help home that resets each night. Tip content lives in `src/data/sleepHelp.ts`
+- **Wake windows** (`/sleep-window`): enter the last wake-up (or use the last one from the Sleep coach log) and see the next nap or bedtime window from the age range. Free. Plus personalization still lives in Sleep coach
+- **Bedtime routine builder** (`/sleep-routine`): tap steps to add them, reorder with up and down buttons, set minutes per step, see when to start to finish by bedtime. Free. Plus: a guided timer that walks through each step
+- **3 a.m. mode** (`/sleep-night`): a dark, low-contrast screen with big White noise and Shush buttons (reuses the free "Balanced noise" and "Womb sounds" loops, starts quiet, stops by itself after 30 minutes), a breathing prompt for the parent, an age-based "try right now" list, and a one-tap "Log this wake". Free
+- **Night wake log** (`/sleep-wakes`): four one-tap entries (woke up, fed, comforted, awake 30+ min), optionally backdated. Free: tonight's list. Plus: a 7-night chart next to Sleep coach night-sleep totals, wakes by time of night, and a week-over-week average. Sleep coach links here and shows tonight's count
+- **Safe sleep and red flags** (`/sleep-safe`): AAP safe sleep (back to sleep, bare crib, room-share, no couch sleeping), a "Talk to your pediatrician if..." card (snoring, pauses in breathing, daytime sleepiness, from the AAP sleep apnea page) and a 911 tier. A safe sleep strip appears on every Sleep help screen. No medical claims: general guidance only, with sources
+- Stored on the device only (`lulla.sleepHelp.v1` in secure storage), included in export and delete-all
+
+**Kid Mode** (`/kid`), one tap from Home, for ages 1 to 5
+- One screen, no navigation: a hub of big picture tiles, six games, and no text a child needs to read. Everything is bundled, so it works with no internet (voice clips are pre-rendered by `scripts/generate-kid-voices.py` into `assets/kidvoice/`, with the typed map in `src/data/kidVoice.ts`)
+- Games: **Pop bubbles** (counting 1 to 10, spoken numbers; ordered numerals for 4 to 5), **Animal friends** (tap for the sound and name, 6 to 12 animals), **Breathing buddy** (a bear that inflates and deflates, "smell the flower, blow the candle", 3 to 6 second breaths), **Match the holes** (drag colors and shapes into the matching hole), **Paint and trace** (finger paint, or trace letters with progress detection; paint only for 1 to 2), **Peekaboo** (find the hidden animal, with a peeking hint for the youngest). Soft colors, slow motion, no flashing, no failure sounds
+- Age setting (1 to 2, 3, 4 to 5) changes counts, hints, numerals, letters, and breath length (`agePlans` in `src/lib/kidLogic.ts`)
+- Lock down: the in-app lock is a corner you hold for 3 seconds, then an adult math question (4 choices, 2.5 s lockout when wrong). The Android back button opens the same math question. Kid Mode has no links, no purchase screens, no ads, no analytics. Notifications are silenced while it is open (`src/lib/kidMode.ts`, read by the notification handler), and the screen stays awake. The parent panel shows iOS Guided Access and Android screen pinning steps
+- Calm-down timer (Plus): 5, 10, or 15 minutes set from the parent panel; it ends with a spoken "all done" and a slow breathing wind-down on a dimmed screen
+- Free: Pop bubbles, Animal friends, Breathing buddy. Plus: Match the holes, Paint and trace, Peekaboo, the timer, and new games with app updates. Plus games are hidden from the child's hub on the free plan (the upgrade button lives only behind the parent gate)
+- Privacy: nothing a child does is stored or sent. The only saved values are the parent's age range, sound toggle, and a setup flag (`lulla.kid.v1`), included in export and delete-all
+
 **Memory book** (`/memories`, `/memory-new`, `/recap`)
 - Moments ("Today they..."), milestones (from the Milestone tracker), and first words (from First words), each with up to 3 photos and a 60-second voice clip
 - Timeline grouped by month; free users keep 10 memories
@@ -79,6 +97,8 @@ Safety and health tracking are always free (milestones, first foods and choking 
 | | Free | Lulla Plus |
 | --- | --- | --- |
 | Sleep coach | One-tap logging, today's view, typical wake windows | Predicted next sleep window, reminder before it opens, daily and weekly charts |
+| Kid Mode | Pop bubbles, Animal friends, Breathing buddy | Match the holes, Paint and trace, Peekaboo, calm-down timer, new games |
+| Sleep help | Troubleshooter, tonight's plan, wake windows, routine builder, 3 a.m. mode, night wake log, safe sleep | Weekly night-wake patterns, guided routine timer |
 | Memory book | 10 memories with photos and voice clips | Unlimited, monthly recap, month or year keepsake PDF |
 | Sleep sounds | 6 core sounds, 15/30/45 min timer | All 20 sounds, all-night timer |
 | First words | 12 starter words | All 24 words, "My voice" recording |

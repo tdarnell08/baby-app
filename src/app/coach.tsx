@@ -5,6 +5,7 @@ import { Body, Btn, Chip, Notice, Panel, Screen, Section, Title, uiStyles } from
 import { PlusLock } from '@/components/PlusLock';
 import { colors, radii, spacing } from '@/constants/theme';
 import { useBabyProfile } from '@/hooks/useBabyProfile';
+import { useSleepHelp } from '@/hooks/useSleepHelp';
 import { useSleepLog } from '@/hooks/useSleepLog';
 import { useNow } from '@/lib/time';
 import { ensureNotificationPermission, remindersSupported } from '@/lib/reminders';
@@ -24,6 +25,7 @@ import {
   todaySegments,
   weekSummaries,
 } from '@/lib/sleepCoach';
+import { tonightCount } from '@/lib/sleepHelpLogic';
 import { LEAD_OPTIONS } from '@/lib/sleepStore';
 
 const HOUR = 60 * 60 * 1000;
@@ -33,6 +35,7 @@ export default function CoachScreen() {
   const router = useRouter();
   const { ageMonths, ageLabel, isPremium, profile } = useBabyProfile();
   const { sessions, prefs, start, stop, remove, setPrefs } = useSleepLog();
+  const { wakes } = useSleepHelp();
   const now = useNow(20000);
   const [ago, setAgo] = useState(0);
   const [note, setNote] = useState<string | null>(null);
@@ -51,6 +54,7 @@ export default function CoachScreen() {
   const prediction = useMemo(() => (isPremium ? predictNext(sessions, ageMonths, now) : null), [isPremium, sessions, ageMonths, now]);
   const awakeSince = open ? null : lastWakeTime(sessions);
   const who = profile.name.trim() || 'Baby';
+  const nightWakes = tonightCount(wakes, now);
 
   const toggleRemind = async (value: boolean) => {
     setNote(null);
@@ -266,6 +270,19 @@ export default function CoachScreen() {
           body="See naps and night sleep side by side for the last 7 days, plus weekly averages, so you can spot patterns and share them with your pediatrician."
         />
       )}
+
+      <Section>Trouble sleeping?</Section>
+      <Panel>
+        <Body>
+          {nightWakes > 0
+            ? `${nightWakes} night ${nightWakes === 1 ? 'wake' : 'wakes'} logged for this night.`
+            : 'Won’t settle, waking at night, or short naps? Tap through to what might help.'}
+        </Body>
+        <View style={uiStyles.wrap}>
+          <Btn label="Sleep help" small onPress={() => router.push('/sleep-help')} />
+          <Btn label="Night wake log" kind="secondary" small onPress={() => router.push('/sleep-wakes')} />
+        </View>
+      </Panel>
 
       <Notice tone="info" title="Safe sleep first">
         Always place babies on their back, on a firm, flat sleep surface with nothing else in the crib. Sleep sounds should stay quiet and across the room. Lulla is not medical advice. Talk to your pediatrician about sleep concerns.

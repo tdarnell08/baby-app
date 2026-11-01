@@ -1,3 +1,4 @@
+import { tipById } from '@/data/sleepHelp';
 import { wipeParentVoices } from '@/hooks/useParentVoice';
 import { loadCharts, wipeCharts } from '@/lib/chartStore';
 import { loadCourses, wipeCourses } from '@/lib/courseStore';
@@ -7,16 +8,20 @@ import { wipeMediaFiles } from '@/lib/media';
 import { loadMemories, wipeMemories } from '@/lib/memoryStore';
 import { loadProfile, wipeProfile } from '@/lib/profileStore';
 import { cancelAllReminders } from '@/lib/reminders';
+import { loadKidPrefs, wipeKidPrefs } from '@/lib/kidStore';
+import { loadSleepHelp, wipeSleepHelp } from '@/lib/sleepHelpStore';
 import { loadSleep, wipeSleep } from '@/lib/sleepStore';
 
 export async function buildExport(): Promise<string> {
-  const [profile, sleep, courses, memories, illness, charts] = await Promise.all([
+  const [profile, sleep, courses, memories, illness, charts, sleepHelp, kid] = await Promise.all([
     loadProfile(),
     loadSleep(),
     loadCourses(),
     loadMemories(),
     loadIllness(),
     loadCharts(),
+    loadSleepHelp(),
+    loadKidPrefs(),
   ]);
   return JSON.stringify(
     {
@@ -36,6 +41,12 @@ export async function buildExport(): Promise<string> {
         start: new Date(s.start).toISOString(),
         end: s.end ? new Date(s.end).toISOString() : null,
       })),
+      kidModeSettings: { ageRange: kid.age, soundOn: kid.sound },
+      sleepHelp: {
+        tonightsPlan: sleepHelp.plan.map((p) => ({ tip: tipById(p.tipId)?.head ?? p.tipId, done: p.done })),
+        bedtimeRoutine: sleepHelp.routine.map((r) => ({ step: r.id, minutes: r.minutes })),
+        nightWakes: sleepHelp.wakes.map((w) => ({ at: new Date(w.at).toISOString(), kind: w.kind })),
+      },
       medicineCourses: courses.courses.map((c) => ({
         type: c.mode === 'asNeeded' ? 'as needed' : 'course',
         maxDosesPer24HoursFromLabel: c.maxPer24,
@@ -97,6 +108,8 @@ export async function deleteEverything(): Promise<void> {
     wipeProfile(),
     wipeParentVoices(),
     wipeSleep(),
+    wipeSleepHelp(),
+    wipeKidPrefs(),
     wipeCourses(),
     wipeIllness(),
     wipeCharts(),

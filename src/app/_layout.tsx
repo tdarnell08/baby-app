@@ -70,7 +70,9 @@ export default function RootLayout() {
             contentStyle: { backgroundColor: colors.nightDeep },
             animation: 'fade',
           }}
-        />
+        >
+          <Stack.Screen name="kid" options={{ gestureEnabled: false }} />
+        </Stack>
       </LockProvider>
     </PremiumProvider>
   );
