@@ -16,6 +16,8 @@ import {
 } from '@expo-google-fonts/nunito';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '@/constants/theme';
+import { LockProvider } from '@/providers/LockProvider';
+import { PremiumProvider } from '@/providers/PremiumProvider';
 
 export default function RootLayout() {
   const [frauncesLoaded, frauncesError] = useFraunces({
@@ -57,16 +59,18 @@ export default function RootLayout() {
   }
 
   return (
-    <>
-      <StatusBar style="light" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.nightDeep },
-          animation: 'fade',
-        }}
-      />
-    </>
+    <PremiumProvider>
+      <LockProvider>
+        <StatusBar style="light" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.nightDeep },
+            animation: 'fade',
+          }}
+        />
+      </LockProvider>
+    </PremiumProvider>
   );
 }
 

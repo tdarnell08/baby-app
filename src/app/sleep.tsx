@@ -7,6 +7,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { BreathingOrb } from '@/components/BreathingOrb';
+import { PlusBadge } from '@/components/PlusBadge';
 import { Starfield } from '@/components/Starfield';
 import { colors, radii, spacing } from '@/constants/theme';
 import {
@@ -19,6 +20,8 @@ import {
   volumeOptions,
   type Evidence,
 } from '@/data/sounds';
+import { freeSoundIds } from '@/data/pricing';
+import { usePremium } from '@/providers/PremiumProvider';
 
 const FADE_SECONDS = 30;
 
@@ -37,6 +40,8 @@ function formatRemaining(seconds: number) {
 export default function SleepScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isPremium } = usePremium();
+  const isLocked = (id: string) => !isPremium && !freeSoundIds.includes(id);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [timerMinutes, setTimerMinutes] = useState(30);
@@ -103,6 +108,10 @@ export default function SleepScreen() {
     setError(null);
     const sound = sleepSounds.find((s) => s.id === soundId);
     if (!sound) return;
+    if (isLocked(soundId)) {
+      router.push('/paywall');
+      return;
+    }
 
     void Haptics.selectionAsync().catch(() => {});
     stopPlayer();
@@ -221,12 +230,19 @@ export default function SleepScreen() {
                   key={opt.label}
                   accessibilityRole="button"
                   onPress={() => {
+                    if (opt.minutes === 0 && !isPremium) {
+                      router.push('/paywall');
+                      return;
+                    }
                     setTimerMinutes(opt.minutes);
                     if (playing) setRemaining(opt.minutes > 0 ? opt.minutes * 60 : null);
                   }}
                   style={[styles.chip, selected && styles.chipOn]}
                 >
-                  <Text style={[styles.chipText, selected && styles.chipTextOn]}>{opt.label}</Text>
+                  <Text style={[styles.chipText, selected && styles.chipTextOn]}>
+                    {opt.label}
+                    {opt.minutes === 0 && !isPremium ? ' 🔒' : ''}
+                  </Text>
                 </Pressable>
               );
             })}
@@ -253,6 +269,7 @@ export default function SleepScreen() {
                         ]}
                       >
                         <View style={[styles.swatch, { backgroundColor: sound.tint }]} />
+                        {isLocked(sound.id) ? <PlusBadge /> : null}
                         <Text style={styles.soundName}>{sound.name}</Text>
                         <Text style={styles.soundBlurb}>{sound.blurb}</Text>
                         <Text style={[styles.soundEvidence, { color: evidenceColor[sound.evidence] }]}>

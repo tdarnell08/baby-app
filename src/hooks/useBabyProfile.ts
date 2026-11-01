@@ -1,52 +1,15 @@
 import { useCallback, useMemo, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
-import { formatAge, buildPlan, dateKey, type InterestId, type TimeTierId } from '@/data/plan';
+import { formatAge, buildPlan, dateKey } from '@/data/plan';
+import { defaultProfile, loadProfile, saveProfile } from '@/lib/profileStore';
+import { MAX_AGE_MONTHS, type BabyProfile } from '@/lib/profileTypes';
+import { usePremium } from '@/providers/PremiumProvider';
 
-const STORAGE_KEY = 'lulla.babyProfile.v1';
 const MONTH_MS = 30.44 * 24 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
-export const MAX_AGE_MONTHS = 30;
 
-export type BabyProfile = {
-  name: string;
-  ageMonths: number;
-  ageSetAt: number;
-  birthDate: string | null;
-  interests: InterestId[];
-  time: TimeTierId;
-  configured: boolean;
-  tiredDate: string | null;
-  achieved: Record<string, string>;
-  weightKg: number | null;
-  weightDate: string | null;
-  weightUnit: 'lb' | 'kg';
-};
-
-const defaults = (): BabyProfile => ({
-  name: '',
-  ageMonths: 6,
-  ageSetAt: Date.now(),
-  birthDate: null,
-  interests: [],
-  time: 'standard',
-  configured: false,
-  tiredDate: null,
-  achieved: {},
-  weightKg: null,
-  weightDate: null,
-  weightUnit: 'lb',
-});
-
-async function load(): Promise<BabyProfile> {
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaults();
-    return { ...defaults(), ...(JSON.parse(raw) as Partial<BabyProfile>) };
-  } catch {
-    return defaults();
-  }
-}
+export { MAX_AGE_MONTHS };
+export type { BabyProfile };
 
 export function parseBirthDate(year: number, month: number, day: number, now: Date): string | null {
   if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) return null;
@@ -68,14 +31,15 @@ function monthsBetween(birth: Date, now: Date) {
 }
 
 export function useBabyProfile() {
-  const [profile, setProfile] = useState<BabyProfile>(defaults);
+  const [profile, setProfile] = useState<BabyProfile>(defaultProfile);
+  const { isPremium } = usePremium();
   const [now, setNow] = useState(() => new Date());
   const [ready, setReady] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      load().then((loaded) => {
+      loadProfile().then((loaded) => {
         if (!active) return;
         setProfile(loaded);
         setNow(new Date());
@@ -90,7 +54,7 @@ export function useBabyProfile() {
   const update = useCallback((patch: Partial<BabyProfile>) => {
     setProfile((prev) => {
       const next = { ...prev, ...patch };
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
+      saveProfile(next);
       return next;
     });
   }, []);
@@ -126,7 +90,7 @@ export function useBabyProfile() {
       if (achieved[id]) delete achieved[id];
       else achieved[id] = dateKey(new Date());
       const next = { ...prev, achieved };
-      AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {});
+      saveProfile(next);
       return next;
     });
   }, []);
@@ -164,18 +128,19 @@ export function useBabyProfile() {
         {
           name: profile.name,
           ageMonths,
-          interests: profile.interests,
-          time: profile.time,
+          interests: isPremium ? profile.interests : [],
+          time: isPremium ? profile.time : 'standard',
           achieved: achievedIds,
         },
         today,
         tired,
       ),
-    [profile.name, ageMonths, profile.interests, profile.time, achievedIds, today, tired],
+    [profile.name, ageMonths, profile.interests, profile.time, isPremium, achievedIds, today, tired],
   );
 
   return {
     profile,
+    isPremium,
     ageMonths,
     ageLabel,
     plan,

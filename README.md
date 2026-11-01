@@ -29,7 +29,7 @@ An Expo (React Native) app for baby sleep, first words, first foods, and early m
 - "Call first" red flags, safe-use rules, what not to give, vitamin D and iron notes, sources, and a not-medical-advice disclaimer
 - US product strengths only (160 mg/5 mL acetaminophen, 100 mg/5 mL ibuprofen); the page warns that other countries and infant ibuprofen drops differ
 
-**Sleep sounds** (14 seamless loops, generated in code, royalty free)
+**Sleep sounds** (20 seamless loops, generated in code, royalty free)
 - Steady noise: white, pink, deep rumble
 - Womb and heartbeat
 - Nature: rain, beach waves, stream, crickets, cicadas, jungle night
@@ -38,7 +38,7 @@ An Expo (React Native) app for baby sleep, first words, first foods, and early m
 - Timer (15, 30, 45 min or all night) with a 30-second fade-out, volume presets, background audio on iOS
 - Every sound is labeled honestly: "Studied in babies", "Adult research" or "Comfort sound", with a short explanation and the safe-volume guidance
 
-**First words** (28 cards across Babble, People, Routines, Animals, Things)
+**First words** (24 cards across Babble, People, Routines, Animals, Things)
 - A 3-round lesson modeled on what the research says works:
   1. Say the word slowly in high, sing-song "parentese"
   2. Say a short sentence around it (round 1)
@@ -60,6 +60,29 @@ An Expo (React Native) app for baby sleep, first words, first foods, and early m
 
 Lulla is not affiliated with any TV show and does not imitate anyone's voice. First Words uses pre-recorded neural caregiver clips (warm, slower parentese). Device text-to-speech is only a fallback. Your own voice in "I'll say it" mode is still the best option for babies.
 
+## Free and Plus tiers
+
+Safety and health tracking are always free (milestones, first foods and choking safety, medicine safety, privacy and security controls). Lulla Plus unlocks extra content and personalization.
+
+| | Free | Lulla Plus |
+| --- | --- | --- |
+| Sleep sounds | 6 core sounds, 15/30/45 min timer | All 20 sounds, all-night timer |
+| First words | 12 starter words | All 24 words, "My voice" recording |
+| First steps | Tummy time, rolling, sitting | Crawling, standing, walking |
+| Daily Play Plan | By age, "We're exhausted" mode | Interests, 15 and 45+ minute plans |
+
+Pricing (set in App Store Connect; the app shows store prices): Yearly $29.99 with a 7-day free trial, Monthly $4.99, Lifetime $59.99. Purchases use RevenueCat (entitlement `plus`). Preview builds can simulate purchases with `EXPO_PUBLIC_ENABLE_MOCK_PURCHASES=true`; production builds without a RevenueCat key cannot unlock Plus.
+
+## Privacy and security
+
+- No accounts, ads, analytics, or tracking. Baby data stays on the device.
+- Profile and dose log are stored in the iOS Keychain / Android Keystore (`expo-secure-store`, device-only), with validation on every read.
+- Optional app lock with Face ID / passcode; the app is covered in the app switcher.
+- Settings has data export, delete-all, and the privacy policy, terms, and medical disclaimer.
+- The medicine dosing page is controlled by `EXPO_PUBLIC_ENABLE_MEDICINE_DOSES` and is off in the production EAS profile (App Store Guideline 1.4.1).
+
+See [docs/APP_STORE.md](docs/APP_STORE.md) for the App Store checklist, privacy label answers, purchase setup, and known risks. Copy `.env.example` to `.env.local` to configure.
+
 ## Run it
 
 ```bash
@@ -69,13 +92,16 @@ npm run ios        # iOS Simulator (macOS)
 npm run web        # browser preview on port 3847
 ```
 
-Other scripts: `npm run typecheck`, `npm run lint`, `npm run sounds` (regenerates sleep WAVs), `npm run voices` (regenerates First Words speech clips; needs `pip install edge-tts`).
+Other scripts: `npm run legal` (exports the policy documents to `docs/`), `npm run typecheck`, `npm run lint`, `npm run sounds` (regenerates sleep WAVs), `npm run voices` (regenerates First Words speech clips; needs `pip install edge-tts`).
 
 To share a browser preview from a remote machine: `npx expo export --platform web`, serve `dist/`, and expose it with a tunnel.
 
 ## Project layout
 
-- `src/app/`: screens (Expo Router): home, plan, sleep, words, foods, steps
+- `src/app/`: screens (Expo Router): home, plan, profile, milestones, medicine, sleep, words, foods, steps, paywall, settings, legal
+- `src/providers/`: purchases/entitlement and app lock
+- `src/lib/`: secure storage, profile store, purchase engine, data export/delete
+- `src/data/pricing.ts` and `src/data/legal.ts`: tiers, pricing, and legal text
 - `src/data/medications.ts`: dosing tables, safety rules, and the dose calculation
 - `src/hooks/useMedLog.ts`: the on-device dose log
 - `src/data/milestones.ts`: milestone checklist data and helpers

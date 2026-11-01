@@ -13,7 +13,7 @@ function todayLabel() {
 export default function PlanScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { profile, ageLabel, plan, tired, update, setTired } = useBabyProfile();
+  const { profile, isPremium, ageLabel, plan, tired, update, setTired } = useBabyProfile();
 
   const who = profile.name.trim();
 
@@ -83,7 +83,13 @@ export default function PlanScreen() {
                     key={tier.id}
                     accessibilityRole="radio"
                     accessibilityState={{ selected: on }}
-                    onPress={() => update({ time: tier.id })}
+                    onPress={() => {
+                      if (!isPremium && tier.id !== 'standard') {
+                        router.push('/paywall');
+                        return;
+                      }
+                      update({ time: tier.id });
+                    }}
                     style={[styles.tier, on && styles.chipOn]}
                   >
                     <Text style={[styles.tierLabel, on && styles.chipTextOn]}>{tier.label}</Text>

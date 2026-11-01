@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { config } from '@/config';
 import { colors, radii, spacing } from '@/constants/theme';
 import {
   callEmergency,
@@ -61,6 +62,29 @@ function logStatus(info: MedInfo, entries: DoseEntry[], now: number) {
 }
 
 export default function MedicineScreen() {
+  if (!config.medicineDoses) return <MedicineUnavailable />;
+  return <MedicineContent />;
+}
+
+function MedicineUnavailable() {
+  const router = useRouter();
+  return (
+    <LinearGradient colors={['#34202E', '#47293D', '#5A3548']} style={styles.root}>
+      <View style={styles.unavailable}>
+        <Text style={styles.title}>Medicine doses</Text>
+        <Text style={styles.subtitle}>
+          This feature isn’t available in this version of Lulla. For dosing, check the label or ask your pediatrician or
+          pharmacist. For poisoning in the US, call 1-800-222-1222.
+        </Text>
+        <Pressable onPress={() => router.replace('/')} style={styles.logBtn} accessibilityRole="button">
+          <Text style={styles.logBtnText}>Back to Home</Text>
+        </Pressable>
+      </View>
+    </LinearGradient>
+  );
+}
+
+function MedicineContent() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const hook = useBabyProfile();
@@ -498,6 +522,7 @@ function DoseTable({ info, weightLb }: { info: MedInfo; weightLb: number | null 
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  unavailable: { flex: 1, justifyContent: 'center', padding: spacing.lg, gap: spacing.md },
   scroll: { paddingHorizontal: spacing.lg, alignItems: 'center' },
   column: { width: '100%', maxWidth: 480 },
   flex: { flex: 1 },

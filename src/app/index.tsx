@@ -6,6 +6,8 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { BreathingOrb } from '@/components/BreathingOrb';
 import { HomeTiles } from '@/components/HomeTiles';
 import { PlanCard } from '@/components/PlanCard';
+import { config } from '@/config';
+import { usePremium } from '@/providers/PremiumProvider';
 import { Starfield } from '@/components/Starfield';
 import { colors, radii, spacing } from '@/constants/theme';
 
@@ -34,16 +36,21 @@ const actions = [
     hint: 'Tummy time to walking practice',
     primary: false,
   },
-  {
-    href: '/medicine' as const,
-    label: 'Medicine doses',
-    hint: 'Weight-based fever and pain doses, with a dose log',
-    primary: false,
-  },
+  ...(config.medicineDoses
+    ? [
+        {
+          href: '/medicine' as const,
+          label: 'Medicine doses',
+          hint: 'Weight-based fever and pain doses, with a dose log',
+          primary: false,
+        },
+      ]
+    : []),
 ];
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { isPremium } = usePremium();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const columnWidth = Math.min(width - spacing.lg * 2, 400);
@@ -67,6 +74,16 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Settings"
+          hitSlop={12}
+          onPress={() => router.push('/settings')}
+          style={styles.settings}
+        >
+          <Text style={styles.settingsText}>Settings</Text>
+        </Pressable>
+
         <Animated.View entering={FadeInDown.duration(700)} style={styles.hero}>
           <BreathingOrb size={88} color={colors.sage} />
           <Text style={styles.brand}>Lulla</Text>
@@ -76,6 +93,16 @@ export default function HomeScreen() {
         <Animated.View entering={FadeInUp.delay(150).duration(700)} style={styles.actions}>
           <PlanCard />
           <HomeTiles />
+          {!isPremium ? (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.push('/paywall')}
+              style={({ pressed }) => [styles.plus, pressed && styles.pressed]}
+            >
+              <Text style={styles.plusTitle}>Lulla Plus</Text>
+              <Text style={styles.plusHint}>All sounds, all words, My voice, full First steps, personalized plans</Text>
+            </Pressable>
+          ) : null}
           {actions.map((action) => (
             <Pressable
               key={action.href}
@@ -105,6 +132,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.xl,
   },
+  settings: { alignSelf: 'flex-end', marginBottom: -spacing.md },
+  settingsText: { fontFamily: 'Nunito_700Bold', fontSize: 14, color: colors.mist },
+  plus: {
+    width: '100%',
+    backgroundColor: 'rgba(230,201,106,0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(230,201,106,0.55)',
+    borderRadius: radii.lg,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+  },
+  plusTitle: { fontFamily: 'Fraunces_600SemiBold', fontSize: 20, color: colors.butter },
+  plusHint: { marginTop: 2, fontFamily: 'Nunito_400Regular', fontSize: 13, lineHeight: 18, color: colors.mist },
   hero: {
     alignItems: 'center',
     gap: spacing.sm,

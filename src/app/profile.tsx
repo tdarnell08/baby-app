@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radii, spacing } from '@/constants/theme';
 import { currentBand, nextBand } from '@/data/milestones';
 import { formatAge, interestOptions, timeTiers, type InterestId } from '@/data/plan';
+import { PlusBadge } from '@/components/PlusBadge';
 import { MAX_AGE_MONTHS, parseBirthDate, useBabyProfile } from '@/hooks/useBabyProfile';
 
 export default function ProfileScreen() {
@@ -41,7 +42,7 @@ export default function ProfileScreen() {
 
 function ProfileForm({ hook }: { hook: ReturnType<typeof useBabyProfile> }) {
   const router = useRouter();
-  const { profile, ageMonths, ageLabel, update, setAge, setBirthDate } = hook;
+  const { profile, isPremium, ageMonths, ageLabel, update, setAge, setBirthDate } = hook;
 
   const initial = profile.birthDate ? profile.birthDate.split('-') : ['', '', ''];
   const [year, setYear] = useState(initial[0] ?? '');
@@ -70,6 +71,10 @@ function ProfileForm({ hook }: { hook: ReturnType<typeof useBabyProfile> }) {
   const digits = (text: string, max: number) => text.replace(/\D/g, '').slice(0, max);
 
   const toggleInterest = (id: InterestId) => {
+    if (!isPremium) {
+      router.push('/paywall');
+      return;
+    }
     const has = profile.interests.includes(id);
     update({
       interests: has ? profile.interests.filter((i) => i !== id) : [...profile.interests, id],
@@ -196,7 +201,10 @@ function ProfileForm({ hook }: { hook: ReturnType<typeof useBabyProfile> }) {
       </View>
       <Text style={styles.helper}>If you use this, we remove the birth date and age moves forward on its own.</Text>
 
-      <Text style={styles.fieldLabel}>What does your baby love?</Text>
+      <View style={styles.labelRow}>
+        <Text style={styles.fieldLabel}>What does your baby love?</Text>
+        {!isPremium ? <PlusBadge /> : null}
+      </View>
       <View style={styles.chips}>
         {interestOptions.map((option) => {
           const on = profile.interests.includes(option.id);
@@ -216,7 +224,10 @@ function ProfileForm({ hook }: { hook: ReturnType<typeof useBabyProfile> }) {
         })}
       </View>
 
-      <Text style={styles.fieldLabel}>How much play time do you usually have?</Text>
+      <View style={styles.labelRow}>
+        <Text style={styles.fieldLabel}>How much play time do you usually have?</Text>
+        {!isPremium ? <PlusBadge /> : null}
+      </View>
       <View style={styles.chips}>
         {timeTiers.map((tier) => {
           const on = profile.time === tier.id;
@@ -225,7 +236,13 @@ function ProfileForm({ hook }: { hook: ReturnType<typeof useBabyProfile> }) {
               key={tier.id}
               accessibilityRole="radio"
               accessibilityState={{ selected: on }}
-              onPress={() => update({ time: tier.id, configured: true })}
+              onPress={() => {
+                if (!isPremium && tier.id !== 'standard') {
+                  router.push('/paywall');
+                  return;
+                }
+                update({ time: tier.id, configured: true });
+              }}
               style={[styles.tier, on && styles.chipOn]}
             >
               <Text style={[styles.tierLabel, on && styles.chipTextOn]}>{tier.label}</Text>
@@ -288,6 +305,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   ageBtnText: { fontFamily: 'Nunito_700Bold', fontSize: 14, color: colors.foam },
+  labelRow: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.sm },
   fieldLabel: {
     marginTop: spacing.md,
     fontFamily: 'Nunito_700Bold',

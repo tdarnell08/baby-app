@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { MilestoneStrip } from '@/components/MilestoneStrip';
+import { PlusBadge } from '@/components/PlusBadge';
 import { colors, radii, spacing } from '@/constants/theme';
 import {
   firstWords,
@@ -24,6 +25,8 @@ import {
   type WordCategory,
 } from '@/data/words';
 import { ROUNDS, TURN_MS, useLesson, type LessonPhase, type VoiceMode } from '@/hooks/useLesson';
+import { freeWordIds } from '@/data/pricing';
+import { usePremium } from '@/providers/PremiumProvider';
 import { useParentVoice, type ParentClipKind } from '@/hooks/useParentVoice';
 
 function TurnBar({ active }: { active: boolean }) {
@@ -165,6 +168,7 @@ function RecordRow({
 export default function WordsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isPremium } = usePremium();
   const [category, setCategory] = useState<WordCategory>('people');
   const [index, setIndex] = useState(0);
   const [mode, setMode] = useState<VoiceMode>('app');
@@ -172,6 +176,7 @@ export default function WordsScreen() {
 
   const words = useMemo(() => firstWords.filter((w) => w.category === category), [category]);
   const word = words[index % words.length];
+  const wordLocked = !isPremium && !freeWordIds.includes(word.id);
   const parentVoice = useParentVoice(word.id);
   const { phase, round, start, stop, hear } = useLesson(mode, parentVoice.clips);
 
@@ -194,12 +199,20 @@ export default function WordsScreen() {
   };
 
   const pickMode = (next: VoiceMode) => {
+    if (next === 'parent' && !isPremium) {
+      router.push('/paywall');
+      return;
+    }
     stop();
     if (busyRecording) void parentVoice.stopRecording();
     setMode(next);
   };
 
   const startLesson = () => {
+    if (wordLocked) {
+      router.push('/paywall');
+      return;
+    }
     if (running) {
       stop();
       return;
@@ -255,6 +268,7 @@ export default function WordsScreen() {
             <Animated.Text entering={ZoomIn.duration(320)} style={styles.emoji}>
               {word.emoji}
             </Animated.Text>
+            {wordLocked ? <PlusBadge dark /> : null}
             <Text style={styles.word}>{word.word}</Text>
             <Text style={styles.phrase}>{word.phrase}</Text>
             <View style={styles.gestureBox}>
@@ -286,7 +300,7 @@ export default function WordsScreen() {
                   style={[styles.modeBtn, selected && styles.modeBtnOn]}
                 >
                   <Text style={[styles.modeText, selected && styles.modeTextOn]}>
-                    {m === 'app' ? 'App voice' : 'My voice'}
+                    {m === 'app' ? 'App voice' : isPremium ? 'My voice' : 'My voice 🔒'}
                   </Text>
                 </Pressable>
               );
@@ -371,7 +385,7 @@ export default function WordsScreen() {
             <Pressable
               accessibilityRole="button"
               disabled={busyRecording}
-              onPress={() => void hear(word)}
+              onPress={() => (wordLocked ? router.push('/paywall') : void hear(word))}
               style={({ pressed }) => [
                 styles.secondary,
                 busyRecording && styles.disabled,

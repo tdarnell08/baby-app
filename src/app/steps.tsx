@@ -5,6 +5,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { MilestoneStrip } from '@/components/MilestoneStrip';
+import { freeStepStages } from '@/data/pricing';
+import { usePremium } from '@/providers/PremiumProvider';
 import { colors, radii, spacing } from '@/constants/theme';
 import {
   evidenceLabels,
@@ -19,6 +21,7 @@ import {
 export default function StepsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { isPremium } = usePremium();
   const [stage, setStage] = useState<MotorStage>('head');
   const [index, setIndex] = useState(0);
   const [showScience, setShowScience] = useState(false);
@@ -72,14 +75,18 @@ export default function StepsScreen() {
           >
             {motorStages.map((s) => {
               const selected = s.id === stage;
+              const locked = !isPremium && !freeStepStages.includes(s.id);
               return (
                 <Pressable
                   key={s.id}
                   accessibilityRole="button"
-                  onPress={() => pickStage(s.id)}
+                  onPress={() => (locked ? router.push('/paywall') : pickStage(s.id))}
                   style={[styles.chip, selected && styles.chipOn]}
                 >
-                  <Text style={[styles.chipText, selected && styles.chipTextOn]}>{s.label}</Text>
+                  <Text style={[styles.chipText, selected && styles.chipTextOn]}>
+                    {s.label}
+                    {locked ? ' 🔒' : ''}
+                  </Text>
                 </Pressable>
               );
             })}

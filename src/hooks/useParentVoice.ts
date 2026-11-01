@@ -8,6 +8,7 @@ import {
   useAudioRecorder,
   useAudioRecorderState,
 } from 'expo-audio';
+import { deleteFileQuietly } from '@/lib/files';
 
 export type ParentClipKind = 'say' | 'phrase';
 
@@ -18,7 +19,20 @@ export type ParentClips = {
 
 type Library = Record<string, ParentClips>;
 
-const STORAGE_KEY = 'lulla.parentVoices.v1';
+export const VOICE_STORAGE_KEY = 'lulla.parentVoices.v1';
+const STORAGE_KEY = VOICE_STORAGE_KEY;
+
+export async function wipeParentVoices() {
+  try {
+    const library = await loadLibrary();
+    for (const clips of Object.values(library)) {
+      deleteFileQuietly(clips?.say);
+      deleteFileQuietly(clips?.phrase);
+    }
+  } finally {
+    await AsyncStorage.removeItem(STORAGE_KEY);
+  }
+}
 
 async function loadLibrary(): Promise<Library> {
   try {
@@ -183,6 +197,7 @@ export function useParentVoice(wordId: string) {
 
   const clearClip = useCallback(
     (kind: ParentClipKind) => {
+      deleteFileQuietly(library[wordId]?.[kind]);
       setLibrary((prev) => {
         const current = { ...(prev[wordId] ?? {}) };
         delete current[kind];
@@ -193,17 +208,19 @@ export function useParentVoice(wordId: string) {
         return next;
       });
     },
-    [wordId],
+    [library, wordId],
   );
 
   const clearWord = useCallback(() => {
+    deleteFileQuietly(library[wordId]?.say);
+    deleteFileQuietly(library[wordId]?.phrase);
     setLibrary((prev) => {
       const next = { ...prev };
       delete next[wordId];
       void saveLibrary(next);
       return next;
     });
-  }, [wordId]);
+  }, [library, wordId]);
 
   return {
     ready,
