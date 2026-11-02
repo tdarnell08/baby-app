@@ -1,46 +1,105 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Svg, { Circle } from 'react-native-svg';
 import { kidColors } from '@/components/kid/kidUi';
+import { guardHoldTarget, KID_HOLD_ID } from '@/lib/kidWebGuard';
 import { gateQuestion, GATE_HOLD_MS, type GateQuestion } from '@/lib/kidLogic';
+
+const RING = 38;
+const RING_STROKE = 4;
+const RING_R = (RING - RING_STROKE) / 2;
+const RING_LEN = 2 * Math.PI * RING_R;
 
 export function CornerHold({ onOpen }: { onOpen: () => void }) {
   const [progress, setProgress] = useState(0);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [hint, setHint] = useState(false);
+  const tick = useRef<ReturnType<typeof setInterval> | null>(null);
+  const done = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startedAt = useRef(0);
+  const openRef = useRef(onOpen);
 
-  const cancel = () => {
-    if (timer.current) clearInterval(timer.current);
-    timer.current = null;
-    setProgress(0);
-  };
+  useEffect(() => {
+    openRef.current = onOpen;
+  }, [onOpen]);
 
-  useEffect(() => () => {
-    if (timer.current) clearInterval(timer.current);
+  const stopTimers = useCallback(() => {
+    if (tick.current) clearInterval(tick.current);
+    if (done.current) clearTimeout(done.current);
+    tick.current = null;
+    done.current = null;
   }, []);
 
+  useEffect(() => guardHoldTarget(), []);
+
+  useEffect(
+    () => () => {
+      stopTimers();
+      if (hintTimer.current) clearTimeout(hintTimer.current);
+    },
+    [stopTimers],
+  );
+
   const begin = () => {
-    cancel();
+    if (tick.current) return;
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    setHint(false);
     startedAt.current = Date.now();
-    timer.current = setInterval(() => {
-      const p = Math.min(1, (Date.now() - startedAt.current) / GATE_HOLD_MS);
-      setProgress(p);
-      if (p >= 1) {
-        cancel();
-        onOpen();
-      }
-    }, 100);
+    setProgress(0.02);
+    tick.current = setInterval(() => {
+      setProgress(Math.min(1, (Date.now() - startedAt.current) / GATE_HOLD_MS));
+    }, 50);
+    done.current = setTimeout(() => {
+      stopTimers();
+      setProgress(0);
+      openRef.current();
+    }, GATE_HOLD_MS);
   };
+
+  const end = () => {
+    if (!tick.current) return;
+    stopTimers();
+    setProgress(0);
+    setHint(true);
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    hintTimer.current = setTimeout(() => setHint(false), 2200);
+  };
+
+  const holding = progress > 0;
 
   return (
     <Pressable
+      nativeID={KID_HOLD_ID}
       accessibilityRole="button"
       accessibilityLabel="Grown-ups: press and hold for 3 seconds to open parent options"
       onPressIn={begin}
-      onPressOut={cancel}
-      style={styles.corner}
+      onPressOut={end}
+      delayLongPress={100000}
+      style={[styles.corner, holding && styles.cornerActive]}
     >
-      <View style={[styles.cornerFill, { width: `${progress * 100}%` }]} />
-      <Text style={styles.cornerText}>Grown-up · hold 3s</Text>
+      <View style={styles.ring} pointerEvents="none">
+        <Svg width={RING} height={RING} viewBox={`0 0 ${RING} ${RING}`}>
+          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke="rgba(74,90,92,0.22)" strokeWidth={RING_STROKE} fill="none" />
+          <Circle
+            cx={RING / 2}
+            cy={RING / 2}
+            r={RING_R}
+            stroke="#4F6F63"
+            strokeWidth={RING_STROKE}
+            strokeLinecap="round"
+            fill="none"
+            strokeDasharray={`${RING_LEN} ${RING_LEN}`}
+            strokeDashoffset={RING_LEN * (1 - progress)}
+            transform={`rotate(-90 ${RING / 2} ${RING / 2})`}
+          />
+        </Svg>
+        <Text selectable={false} style={styles.lock}>
+          🔒
+        </Text>
+      </View>
+      <Text selectable={false} style={styles.cornerText}>
+        {holding ? 'Keep holding…' : hint ? 'Hold for 3 seconds' : 'Grown-ups'}
+      </Text>
     </Pressable>
   );
 }
@@ -68,8 +127,8 @@ export function ParentGate({ onPass, onCancel }: { onPass: () => void; onCancel:
   return (
     <View style={styles.overlay} accessibilityViewIsModal>
       <View style={styles.card}>
-        <Text style={styles.title}>Grown-ups only</Text>
-        <Text style={styles.q}>{question.text}</Text>
+        <Text selectable={false} style={styles.title}>Grown-ups only</Text>
+        <Text selectable={false} style={styles.q}>{question.text}</Text>
         <View style={styles.options}>
           {question.options.map((o) => (
             <Pressable
@@ -79,13 +138,13 @@ export function ParentGate({ onPass, onCancel }: { onPass: () => void; onCancel:
               onPress={() => answer(o)}
               style={({ pressed }) => [styles.option, pressed && { opacity: 0.8 }, locked && { opacity: 0.45 }]}
             >
-              <Text style={styles.optionText}>{o}</Text>
+              <Text selectable={false} style={styles.optionText}>{o}</Text>
             </Pressable>
           ))}
         </View>
-        <Text style={styles.note}>{wrong ? 'Not quite. Here is a new question in a moment.' : 'Answer to open parent options.'}</Text>
+        <Text selectable={false} style={styles.note}>{wrong ? 'Not quite. Here is a new question in a moment.' : 'Answer to open parent options.'}</Text>
         <Pressable accessibilityRole="button" onPress={onCancel} hitSlop={10}>
-          <Text style={styles.cancel}>Back to games</Text>
+          <Text selectable={false} style={styles.cancel}>Back to games</Text>
         </Pressable>
       </View>
     </View>
@@ -94,16 +153,21 @@ export function ParentGate({ onPass, onCancel }: { onPass: () => void; onCancel:
 
 const styles = StyleSheet.create({
   corner: {
-    height: 30,
-    minWidth: 130,
-    borderRadius: 15,
-    paddingHorizontal: 12,
-    justifyContent: 'center',
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    height: 46,
+    paddingLeft: 4,
+    paddingRight: 14,
+    borderRadius: 23,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderWidth: 1,
+    borderColor: 'rgba(74,90,92,0.18)',
   },
-  cornerFill: { position: 'absolute', left: 0, top: 0, bottom: 0, backgroundColor: 'rgba(74,90,92,0.25)' },
-  cornerText: { fontFamily: 'Nunito_600SemiBold', fontSize: 11, color: 'rgba(74,90,92,0.8)' },
+  cornerActive: { backgroundColor: 'rgba(255,255,255,0.92)' },
+  ring: { width: RING, height: RING, alignItems: 'center', justifyContent: 'center' },
+  lock: { position: 'absolute', fontSize: 15 },
+  cornerText: { fontFamily: 'Nunito_700Bold', fontSize: 13, color: kidColors.ink },
   overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(40,50,55,0.55)', alignItems: 'center', justifyContent: 'center', padding: 24, zIndex: 20 },
   card: { width: '100%', maxWidth: 380, borderRadius: 28, backgroundColor: '#F6F1E6', padding: 24, gap: 14, alignItems: 'center' },
   title: { fontFamily: 'Fraunces_700Bold', fontSize: 24, color: kidColors.ink },

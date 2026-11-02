@@ -3,6 +3,7 @@ import { Animated, PanResponder, StyleSheet, Text, View } from 'react-native';
 import { kidColors, makeBox, ShapeSvg, type GameProps } from '@/components/kid/kidUi';
 import type { KidClip } from '@/data/kidVoice';
 import { KID_COLORS, KID_SHAPES, pickMany, type KidShape } from '@/lib/kidLogic';
+import { KID_PAINT_ID } from '@/lib/kidWebGuard';
 
 type Item = { id: string; shape: KidShape; color: string; colorId: string };
 
@@ -35,6 +36,7 @@ function Piece({ item, size, home, target, onDrop, placed }: { item: Item; size:
 
   return (
     <Animated.View
+      nativeID={`${KID_PAINT_ID}-${item.id}`}
       {...(placed ? {} : responder.panHandlers)}
       style={[styles.abs, { left: home.x - size / 2, top: home.y - size / 2, width: size, height: size, transform: pan.getTranslateTransform() }]}
     >

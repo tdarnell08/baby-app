@@ -3,6 +3,7 @@ import { PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { BigButton, kidColors, makeBox, type GameProps } from '@/components/kid/kidUi';
 import type { KidClip } from '@/data/kidVoice';
+import { KID_PAINT_ID } from '@/lib/kidWebGuard';
 import { KID_COLORS, coverage, letterStrokes, letterTargets, type Pt } from '@/lib/kidLogic';
 
 type Stroke = { color: string; pts: Pt[] };
@@ -117,7 +118,7 @@ export function PaintGame({ age, say }: GameProps) {
         ))}
       </View>
 
-      <View style={styles.canvas} onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })} {...responder.panHandlers}>
+      <View nativeID={KID_PAINT_ID} style={styles.canvas} onLayout={(e) => setBox({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })} {...responder.panHandlers}>
         <Svg width={box.w} height={box.h} pointerEvents="none">
           {mode === 'trace'
             ? (letterStrokes[letter] ?? []).map((s, i) => (

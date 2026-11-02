@@ -18,6 +18,7 @@ import { useKidAudio } from '@/hooks/useKidAudio';
 import { useKidPrefs } from '@/hooks/useKidPrefs';
 import { agePlans, kidGames, timerRemainingSec, type KidGameId } from '@/lib/kidLogic';
 import { setKidModeActive } from '@/lib/kidMode';
+import { KID_ROOT_ID, useKidWebGuard } from '@/lib/kidWebGuard';
 import { nowMs, useNow } from '@/lib/time';
 import { usePremium } from '@/providers/PremiumProvider';
 
@@ -37,7 +38,7 @@ function TimerPill({ timer, onDone }: { timer: Timer; onDone: () => void }) {
   const s = `${remaining % 60}`.padStart(2, '0');
   return (
     <View style={styles.pill} accessibilityLabel={`${m} minutes ${s} seconds left`}>
-      <Text style={styles.pillText}>
+      <Text selectable={false} style={styles.pillText}>
         {m}:{s}
       </Text>
     </View>
@@ -74,6 +75,7 @@ export default function KidModeScreen() {
   const [winding, setWinding] = useState(false);
 
   useKeepAwake();
+  useKidWebGuard();
 
   useEffect(() => {
     setKidModeActive(true);
@@ -135,14 +137,16 @@ export default function KidModeScreen() {
   const gameProps: GameProps = { age: plan, say, stopAudio: stop };
 
   return (
-    <LinearGradient colors={winding ? kidColors.dim : kidColors.gradient} style={styles.root}>
+    <LinearGradient nativeID={KID_ROOT_ID} colors={winding ? kidColors.dim : kidColors.gradient} style={styles.root}>
       <View style={[styles.content, { paddingTop: insets.top + spacing.sm, paddingBottom: insets.bottom + spacing.md }]}>
         <View style={styles.top}>
           <CornerHold onOpen={() => setGate(true)} />
           {timer ? <TimerPill timer={timer} onDone={onTimerDone} /> : <View />}
           {view !== 'hub' && !winding ? (
-            <Pressable accessibilityRole="button" accessibilityLabel="Back to games" onPress={goHub} style={styles.home}>
-              <Text style={styles.homeText}>🏠</Text>
+            <Pressable accessibilityRole="button" accessibilityLabel="Back to games" onPress={goHub} style={[styles.home, styles.homeBtn]}>
+              <Text selectable={false} style={styles.homeText}>
+                🏠
+              </Text>
             </Pressable>
           ) : (
             <View style={styles.home} />
@@ -213,7 +217,8 @@ const styles = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', minHeight: 56 },
   pill: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.55)' },
   pillText: { fontFamily: 'Nunito_700Bold', fontSize: 18, color: kidColors.ink },
-  home: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.0)' },
+  home: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
+  homeBtn: { backgroundColor: 'rgba(255,255,255,0.55)' },
   homeText: { fontSize: 34 },
   hub: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md, alignContent: 'center', justifyContent: 'center' },
   tile: { width: '46%', aspectRatio: 1, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
