@@ -10,20 +10,21 @@ export type LegalDoc = {
   sections: LegalSection[];
 };
 
-const UPDATED = 'October 31, 2026';
+const UPDATED = 'November 4, 2026';
 
 export const privacyPolicy: LegalDoc = {
   id: 'privacy',
   title: 'Privacy Policy',
   updated: UPDATED,
   intro:
-    'Lulla is built so that your baby’s information stays with you. There are no accounts, no ads, no analytics, and no tracking. This policy explains exactly what the app stores and when anything leaves your device.',
+    'Lulla is built so that your baby’s information stays with you. There are no accounts, no ad networks, no analytics, and no tracking. This policy explains exactly what the app stores and when anything leaves your device.',
   sections: [
     {
       heading: 'The short version',
       body: [
         'Everything you enter into Lulla is stored on your device. We do not have a server that receives your baby’s information.',
-        'We do not sell or share your information, do not show ads, and do not track you across other apps or websites.',
+        'We do not sell or share your information, do not run ad networks, and do not track you across other apps or websites.',
+        'The optional Parent picks and Best by age pages show products and toys by age, with what the makers say about them. The age you pick or type there is used only to filter the list on that screen and is not saved. Some of their links may be affiliate links, which means we may earn a commission if you buy. It is labeled as such, you can hide it in Settings, and it never appears in Kid Mode.',
         'The only network activity is checking and processing a Lulla Plus purchase, described below.',
       ],
     },
@@ -39,7 +40,7 @@ export const privacyPolicy: LegalDoc = {
         'Sick Day symptom log: illness episodes you start, with the temperatures (and how they were taken), fluids, wet diapers, sleep notes, behavior, and notes you enter, as a timeline.',
         'Package dosing charts: the product name, ingredient, any table you type from the package, and any photo of the package chart you choose to save. Lulla does not read the photo or interpret the chart.',
         'Memory book: the titles, notes, and dates you write, plus any photos and voice clips you attach. Photos are resized and saved as files in the app’s private storage.',
-        'Settings: whether app lock is on, and your Lulla Plus status.',
+        'Settings: whether app lock is on, whether Parent picks and Best by age show on the home screen, and your Lulla Plus status.',
         'Voice recordings: only if you choose to record your voice for First words. Recordings are saved as files on your device and are never uploaded.',
       ],
     },
@@ -57,6 +58,7 @@ export const privacyPolicy: LegalDoc = {
       body: [
         'Nothing you enter about your baby is sent to us or to anyone else.',
         'Lulla Plus purchases are handled by Apple. We use RevenueCat to confirm whether a purchase is active. RevenueCat receives an anonymous app user ID, your purchase and subscription status, and standard technical information such as your IP address, device model, and app version. It does not receive your baby’s information.',
+        'Parent picks and Best by age: when you tap a product link, your phone opens the brand’s or retailer’s website in your browser. Lulla does not send them anything and does not see what you tap or buy. That website, and an affiliate network if the link is an affiliate link, may use cookies or other tracking under their own privacy policies, so review them before you buy.',
         'The microphone is used only while you press record. Audio is not sent anywhere.',
         'Photos are read only when you choose them from your library or take them with the camera. Lulla saves a resized copy and never uploads it. When you export a keepsake PDF, a medicine record, or a Sick Day doctor summary, the text or PDF is made on your phone and goes only where you choose to share it.',
       ],
@@ -65,7 +67,7 @@ export const privacyPolicy: LegalDoc = {
       heading: 'Children’s privacy',
       body: [
         'Lulla is designed for parents and caregivers, not for children. Information about your baby is entered by you and stays on your device. We do not knowingly collect personal information from children.',
-        'Kid Mode is a section of simple games a parent can hand to a young child. Kid Mode collects no information from children: no names, photos, voice, location, or identifiers, and it has no ads, no links to outside sites, no purchase screens, no analytics, and no accounts. It does not use the camera, microphone, or internet connection, and everything it plays is stored in the app. What your child does in a game, including anything they draw, is not saved. The only Kid Mode information kept is the age range, sound setting, and a “set up” flag that the parent chooses, stored on the device.',
+        'Kid Mode is a section of simple games a parent can hand to a young child. Kid Mode collects no information from children: no names, photos, voice, location, or identifiers, and it has no ads, no product picks, no links to outside sites, no purchase screens, no analytics, and no accounts. It does not use the camera, microphone, or internet connection, and everything it plays is stored in the app. What your child does in a game, including anything they draw, is not saved. The only Kid Mode information kept is the age range, sound setting, and a “set up” flag that the parent chooses, stored on the device.',
         'Leaving Kid Mode, changing its settings, or buying Lulla Plus requires a parent check (holding a corner for 3 seconds, then answering an adult math question). Notifications are silenced while Kid Mode is open.',
       ],
     },
@@ -126,6 +128,13 @@ export const termsOfUse: LegalDoc = {
       heading: 'Sleep sounds',
       body: [
         'Keep sound at a low volume and the speaker well away from your baby’s crib. Never use sound as a substitute for safe sleep practices. Follow current safe sleep guidance from your pediatrician and the American Academy of Pediatrics.',
+      ],
+    },
+    {
+      heading: 'Parent picks, Best by age, and affiliate links',
+      body: [
+        'Parent picks and Best by age list products and toys, with the makers’ own descriptions and safety notes. Some links may be affiliate links, and we may earn a commission if you buy through them, at no extra cost to you. Buttons say when a link is an affiliate link.',
+        'Products are sold by the brands and retailers, not by Lulla. Prices, availability, ingredients, and age guidance can change, so read the current label and the seller’s terms before you buy. A listing is not a guarantee that a product is right or safe for your child, and it is not a ranking. We do not show star ratings or scores. We mark a green claim as an independent check only when a third-party seal or listing supports it, and otherwise say it is the brand’s claim.',
       ],
     },
     {
@@ -192,6 +201,12 @@ export const medicalDisclaimer: LegalDoc = {
       body: [
         'Kid Mode games are simple learning play for ages 1 to 5. They are not therapy, do not treat or diagnose anything, and are not a substitute for a caregiver. Stay with your child, watch for small parts and cords near the phone, and keep screen time in balance. The American Academy of Pediatrics suggests avoiding screens for children under 18 months other than video chatting, and keeping screen time for ages 2 to 5 to about one hour a day of high-quality content.',
         'The breathing buddy is a calming play activity, not a treatment for anxiety, tantrums, or any condition. In an emergency, call 911 first. Guided Access and screen pinning are settings built into your phone, and their steps can vary.',
+      ],
+    },
+    {
+      heading: 'Parent picks and Best by age',
+      body: [
+        'Parent picks and Best by age show products and toys and what the makers say about them. They are not medical advice. Age labels and safety notes are summaries of the makers’ labels and public safety guidance, which can change, so always read the current label and manual and follow the age on the package. Keep small parts, small balls, and magnets away from young children. “Non-toxic” and “natural” are marketing terms with no single legal meaning, and a product being gentle for most children does not mean it is right for yours. Check the label for allergens, follow the age and safety directions, do a patch test, and ask your pediatrician about skin conditions or allergies.',
       ],
     },
     {

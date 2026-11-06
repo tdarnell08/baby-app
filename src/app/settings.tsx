@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { config } from '@/config';
 import { colors, radii, spacing } from '@/constants/theme';
 import type { LegalDocId } from '@/data/legal';
+import { usePicksPrefs } from '@/hooks/usePicksPrefs';
 import { buildExport, deleteEverything } from '@/lib/dataControls';
 import { useAppLock } from '@/providers/LockProvider';
 import { usePremium } from '@/providers/PremiumProvider';
@@ -16,6 +17,7 @@ export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { isPremium, mode, restore } = usePremium();
   const lock = useAppLock();
+  const { prefs: picksPrefs, update: updatePicks } = usePicksPrefs();
   const [lockNote, setLockNote] = useState<string | null>(null);
   const [exportText, setExportText] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -140,6 +142,24 @@ export default function SettingsScreen() {
               </View>
             )}
             {deleted ? <Text style={styles.note}>All of your data has been deleted from this device.</Text> : null}
+          </View>
+
+          <Text style={styles.section}>Parent picks and Best by age</Text>
+          <View style={styles.panel}>
+            <View style={styles.switchRow}>
+              <View style={styles.flex}>
+                <Text style={styles.rowLabel}>Show on the home screen</Text>
+                <Text style={styles.body}>Shows the weekly Parent picks and the Best by age shopping guide. Some links are affiliate links, and neither appears in Kid Mode.</Text>
+              </View>
+              <Switch
+                accessibilityLabel="Show Parent picks and Best by age on the home screen"
+                value={picksPrefs.show}
+                onValueChange={(show) => updatePicks({ show })}
+                trackColor={{ true: colors.butter, false: 'rgba(255,255,255,0.2)' }}
+              />
+            </View>
+            <Row label="Open Parent picks" onPress={() => router.push('/picks')} />
+            <Row label="Open Best by age" onPress={() => router.push('/best-by-age')} />
           </View>
 
           <Text style={styles.section}>Legal</Text>

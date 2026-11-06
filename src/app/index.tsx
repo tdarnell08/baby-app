@@ -6,6 +6,7 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { BreathingOrb } from '@/components/BreathingOrb';
 import { HomeTiles } from '@/components/HomeTiles';
 import { PlanCard } from '@/components/PlanCard';
+import { usePicksPrefs } from '@/hooks/usePicksPrefs';
 import { usePremium } from '@/providers/PremiumProvider';
 import { Starfield } from '@/components/Starfield';
 import { colors, radii, spacing } from '@/constants/theme';
@@ -48,6 +49,18 @@ const actions = [
     primary: false,
   },
   {
+    href: '/picks' as const,
+    label: 'Parent picks',
+    hint: 'One gentler everyday find each week. Some links earn us a commission.',
+    primary: false,
+  },
+  {
+    href: '/best-by-age' as const,
+    label: 'Best by age',
+    hint: 'Well-known products and toys for your child’s age, with safety notes. Some links earn us a commission.',
+    primary: false,
+  },
+  {
     href: '/sick' as const,
     label: 'Sick Day',
     hint: 'Medicine log, symptoms, when to call the doctor. Always free.',
@@ -58,6 +71,7 @@ const actions = [
 export default function HomeScreen() {
   const router = useRouter();
   const { isPremium } = usePremium();
+  const { prefs: picksPrefs } = usePicksPrefs();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const columnWidth = Math.min(width - spacing.lg * 2, 400);
@@ -110,7 +124,7 @@ export default function HomeScreen() {
               <Text style={styles.plusHint}>Sleep predictions, unlimited memories, keepsake PDFs, every sound and word</Text>
             </Pressable>
           ) : null}
-          {actions.map((action) => (
+          {actions.filter((a) => (a.href !== '/picks' && a.href !== '/best-by-age') || picksPrefs.show).map((action) => (
             <Pressable
               key={action.href}
               accessibilityRole="button"

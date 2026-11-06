@@ -1,6 +1,6 @@
 # Lulla Terms of Use
 
-_Last updated: October 31, 2026_
+_Last updated: November 4, 2026_
 
 These terms apply when you use Lulla. They work together with Apple’s Standard License Agreement for apps downloaded from the App Store.
 
@@ -23,6 +23,11 @@ These terms apply when you use Lulla. They work together with Apple’s Standard
 ## Sleep sounds
 
 - Keep sound at a low volume and the speaker well away from your baby’s crib. Never use sound as a substitute for safe sleep practices. Follow current safe sleep guidance from your pediatrician and the American Academy of Pediatrics.
+
+## Parent picks, Best by age, and affiliate links
+
+- Parent picks and Best by age list products and toys, with the makers’ own descriptions and safety notes. Some links may be affiliate links, and we may earn a commission if you buy through them, at no extra cost to you. Buttons say when a link is an affiliate link.
+- Products are sold by the brands and retailers, not by Lulla. Prices, availability, ingredients, and age guidance can change, so read the current label and the seller’s terms before you buy. A listing is not a guarantee that a product is right or safe for your child, and it is not a ranking. We do not show star ratings or scores. We mark a green claim as an independent check only when a third-party seal or listing supports it, and otherwise say it is the brand’s claim.
 
 ## No warranty and limits of liability
 

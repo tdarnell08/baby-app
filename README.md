@@ -107,9 +107,23 @@ Safety and health tracking are always free (milestones, first foods and choking 
 
 Pricing (set in App Store Connect; the app shows store prices): Yearly $29.99 with a 7-day free trial, Monthly $4.99, Lifetime $59.99. Purchases use RevenueCat (entitlement `plus`). Preview builds can simulate purchases with `EXPO_PUBLIC_ENABLE_MOCK_PURCHASES=true`; production builds without a RevenueCat key cannot unlock Plus.
 
+## Parent picks
+
+A "Parent picks" screen features one gentler everyday product per week (rotating through `src/data/picks.ts`), with what the brand says, what to watch for, and links to check ingredients and third-party ratings. Affiliate links are configured through `.env.local` (see `.env.example`) and are disclosed on the button and the screen. It is free, can be hidden from the home screen in Settings, and never appears in Kid Mode.
+
+
+## Best by age
+
+A parent-facing "Best by age" screen (`src/app/best-by-age.tsx`). The parent taps an age band (0-3 mo, 3-6 mo, 6-12 mo, 1, 2, 3, 4-5 yrs) or types an age in months or years, then filters by category (toys, feeding, sleep, bath, gear). It starts from the baby profile age when one is set. The age and filter live in screen state only and are never saved or sent anywhere.
+
+- Items live in `src/data/bestByAge.ts`. Each has the maker's own age label, a sourced "why we like it", safety notes, a green-claim tier, and source links.
+- Rules (enforced by `npm run test:age`): never list an item below the youngest age on its own label, no star ratings or scores, and "verified" green only when a third-party seal or listing source is linked. "Non-toxic" is repeated only as a brand claim, never as ours.
+- Links go to the brand's page until you set `EXPO_PUBLIC_AFFILIATE_<ITEM_ID>` in `.env.local` (see `.env.example`). When one is set, the button says "(affiliate link)" and the screen discloses the commission.
+- Shown together with Parent picks, hidden by the same Settings switch, and never in Kid Mode. Re-check every entry against the current label before release.
+
 ## Privacy and security
 
-- No accounts, ads, analytics, or tracking. Baby data stays on the device. Reminders are local notifications, and PDFs are generated on the phone.
+- No accounts, ad networks, analytics, or tracking. Baby data stays on the device. Reminders are local notifications, and PDFs are generated on the phone.
 - Profile, sleep log, medicine log, symptom log, package chart text, and memory text are stored in the iOS Keychain / Android Keystore (`expo-secure-store`, device-only), with validation on every read.
 - Optional app lock with Face ID / passcode; the app is covered in the app switcher.
 - Settings has data export, delete-all, and the privacy policy, terms, and medical disclaimer.

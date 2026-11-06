@@ -9,11 +9,12 @@ import { loadMemories, wipeMemories } from '@/lib/memoryStore';
 import { loadProfile, wipeProfile } from '@/lib/profileStore';
 import { cancelAllReminders } from '@/lib/reminders';
 import { loadKidPrefs, wipeKidPrefs } from '@/lib/kidStore';
+import { loadPicksPrefs, wipePicksPrefs } from '@/lib/picksStore';
 import { loadSleepHelp, wipeSleepHelp } from '@/lib/sleepHelpStore';
 import { loadSleep, wipeSleep } from '@/lib/sleepStore';
 
 export async function buildExport(): Promise<string> {
-  const [profile, sleep, courses, memories, illness, charts, sleepHelp, kid] = await Promise.all([
+  const [profile, sleep, courses, memories, illness, charts, sleepHelp, kid, picksPrefs] = await Promise.all([
     loadProfile(),
     loadSleep(),
     loadCourses(),
@@ -22,6 +23,7 @@ export async function buildExport(): Promise<string> {
     loadCharts(),
     loadSleepHelp(),
     loadKidPrefs(),
+    loadPicksPrefs(),
   ]);
   return JSON.stringify(
     {
@@ -42,6 +44,7 @@ export async function buildExport(): Promise<string> {
         end: s.end ? new Date(s.end).toISOString() : null,
       })),
       kidModeSettings: { ageRange: kid.age, soundOn: kid.sound },
+      parentPicksOnHome: picksPrefs.show,
       sleepHelp: {
         tonightsPlan: sleepHelp.plan.map((p) => ({ tip: tipById(p.tipId)?.head ?? p.tipId, done: p.done })),
         bedtimeRoutine: sleepHelp.routine.map((r) => ({ step: r.id, minutes: r.minutes })),
@@ -110,6 +113,7 @@ export async function deleteEverything(): Promise<void> {
     wipeSleep(),
     wipeSleepHelp(),
     wipeKidPrefs(),
+    wipePicksPrefs(),
     wipeCourses(),
     wipeIllness(),
     wipeCharts(),

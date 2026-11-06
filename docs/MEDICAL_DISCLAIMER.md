@@ -1,6 +1,6 @@
 # Lulla Medical Disclaimer
 
-_Last updated: October 31, 2026_
+_Last updated: November 4, 2026_
 
 Lulla shares general information for parents and caregivers. It is not a substitute for professional medical advice, diagnosis, or treatment.
 
@@ -36,6 +36,10 @@ Lulla shares general information for parents and caregivers. It is not a substit
 
 - Kid Mode games are simple learning play for ages 1 to 5. They are not therapy, do not treat or diagnose anything, and are not a substitute for a caregiver. Stay with your child, watch for small parts and cords near the phone, and keep screen time in balance. The American Academy of Pediatrics suggests avoiding screens for children under 18 months other than video chatting, and keeping screen time for ages 2 to 5 to about one hour a day of high-quality content.
 - The breathing buddy is a calming play activity, not a treatment for anxiety, tantrums, or any condition. In an emergency, call 911 first. Guided Access and screen pinning are settings built into your phone, and their steps can vary.
+
+## Parent picks and Best by age
+
+- Parent picks and Best by age show products and toys and what the makers say about them. They are not medical advice. Age labels and safety notes are summaries of the makers’ labels and public safety guidance, which can change, so always read the current label and manual and follow the age on the package. Keep small parts, small balls, and magnets away from young children. “Non-toxic” and “natural” are marketing terms with no single legal meaning, and a product being gentle for most children does not mean it is right for yours. Check the label for allergens, follow the age and safety directions, do a patch test, and ask your pediatrician about skin conditions or allergies.
 
 ## Development, food, and movement
 
